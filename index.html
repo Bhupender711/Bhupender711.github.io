@@ -1,0 +1,1861 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<script src="reproducing_visualisations_presentation_files/libs/clipboard/clipboard.min.js"></script>
+<script src="reproducing_visualisations_presentation_files/libs/quarto-html/tabby.min.js"></script>
+<script src="reproducing_visualisations_presentation_files/libs/quarto-html/popper.min.js"></script>
+<script src="reproducing_visualisations_presentation_files/libs/quarto-html/tippy.umd.min.js"></script>
+<link href="reproducing_visualisations_presentation_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="reproducing_visualisations_presentation_files/libs/quarto-html/light-border.css" rel="stylesheet">
+<link href="reproducing_visualisations_presentation_files/libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+  <meta name="generator" content="quarto-1.9.37">
+
+  <meta name="author" content="Bhupender Singh">
+  <meta name="dcterms.date" content="2026-06-16">
+  <title>Reproducing the visualisations using R programming language</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="reproducing_visualisations_presentation_files/libs/revealjs/dist/reset.css">
+  <link rel="stylesheet" href="reproducing_visualisations_presentation_files/libs/revealjs/dist/reveal.css">
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+      vertical-align: middle;
+    }
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      { color: #003b4f; background-color: #f1f3f5; }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span { color: #003b4f; } /* Normal */
+    code span.al { color: #ad0000; } /* Alert */
+    code span.an { color: #5e5e5e; } /* Annotation */
+    code span.at { color: #657422; } /* Attribute */
+    code span.bn { color: #ad0000; } /* BaseN */
+    code span.bu { } /* BuiltIn */
+    code span.cf { color: #003b4f; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #20794d; } /* Char */
+    code span.cn { color: #8f5902; } /* Constant */
+    code span.co { color: #5e5e5e; } /* Comment */
+    code span.cv { color: #5e5e5e; font-style: italic; } /* CommentVar */
+    code span.do { color: #5e5e5e; font-style: italic; } /* Documentation */
+    code span.dt { color: #ad0000; } /* DataType */
+    code span.dv { color: #ad0000; } /* DecVal */
+    code span.er { color: #ad0000; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #ad0000; } /* Float */
+    code span.fu { color: #4758ab; } /* Function */
+    code span.im { color: #00769e; } /* Import */
+    code span.in { color: #5e5e5e; } /* Information */
+    code span.kw { color: #003b4f; font-weight: bold; } /* Keyword */
+    code span.op { color: #5e5e5e; } /* Operator */
+    code span.ot { color: #003b4f; } /* Other */
+    code span.pp { color: #ad0000; } /* Preprocessor */
+    code span.sc { color: #5e5e5e; } /* SpecialChar */
+    code span.ss { color: #20794d; } /* SpecialString */
+    code span.st { color: #20794d; } /* String */
+    code span.va { color: #111111; } /* Variable */
+    code span.vs { color: #20794d; } /* VerbatimString */
+    code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="reproducing_visualisations_presentation_files/libs/revealjs/dist/theme/quarto-0427d8d92a431aa6a6430e53ec02a470.css">
+  <link href="reproducing_visualisations_presentation_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
+  <link href="reproducing_visualisations_presentation_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
+  <link href="reproducing_visualisations_presentation_files/libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
+  <link href="reproducing_visualisations_presentation_files/libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
+  <style type="text/css">
+    .reveal div.sourceCode {
+      margin: 0;
+      overflow: auto;
+    }
+    .reveal div.hanging-indent {
+      margin-left: 1em;
+      text-indent: -1em;
+    }
+    .reveal .slide:not(.center) {
+      height: 100%;
+      overflow-y: auto;
+    }
+    .reveal .slide.scrollable {
+      overflow-y: auto;
+    }
+    .reveal .footnotes {
+      height: 100%;
+      overflow-y: auto;
+    }
+    .reveal .slide .absolute {
+      position: absolute;
+      display: block;
+    }
+    .reveal .footnotes ol {
+      counter-reset: ol;
+      list-style-type: none; 
+      margin-left: 0;
+    }
+    .reveal .footnotes ol li:before {
+      counter-increment: ol;
+      content: counter(ol) ". "; 
+    }
+    .reveal .footnotes ol li > p:first-child {
+      display: inline-block;
+    }
+    .reveal .slide ul,
+    .reveal .slide ol {
+      margin-bottom: 0.5em;
+    }
+    .reveal .slide ul li,
+    .reveal .slide ol li {
+      margin-top: 0.4em;
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide ul[role="tablist"] li {
+      margin-bottom: 0;
+    }
+    .reveal .slide ul li > *:first-child,
+    .reveal .slide ol li > *:first-child {
+      margin-block-start: 0;
+    }
+    .reveal .slide ul li > *:last-child,
+    .reveal .slide ol li > *:last-child {
+      margin-block-end: 0;
+    }
+    .reveal .slide .columns:nth-child(3) {
+      margin-block-start: 0.8em;
+    }
+    .reveal blockquote {
+      box-shadow: none;
+    }
+    .reveal .tippy-content>* {
+      margin-top: 0.2em;
+      margin-bottom: 0.7em;
+    }
+    .reveal .tippy-content>*:last-child {
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide > img.stretch.quarto-figure-center,
+    .reveal .slide > img.r-stretch.quarto-figure-center {
+      display: block;
+      margin-left: auto;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-left,
+    .reveal .slide > img.r-stretch.quarto-figure-left  {
+      display: block;
+      margin-left: 0;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-right,
+    .reveal .slide > img.r-stretch.quarto-figure-right  {
+      display: block;
+      margin-left: auto;
+      margin-right: 0; 
+    }
+  </style>
+</head>
+<body class="quarto-light">
+  <div class="reveal">
+    <div class="slides">
+
+<section id="title-slide" class="quarto-title-block center">
+  <h1 class="title">Reproducing the visualisations using R programming language</h1>
+  <p class="subtitle">Student ID: 400401832</p>
+
+<div class="quarto-title-authors">
+<div class="quarto-title-author">
+<div class="quarto-title-author-name">
+Bhupender Singh 
+</div>
+<div class="quarto-title-author-email">
+<a href="mailto:singh.bhupender@stud.hs-fresenius.de">singh.bhupender@stud.hs-fresenius.de</a>
+</div>
+</div>
+</div>
+
+  <p class="date">2026-06-16</p>
+</section>
+<section id="table-of-content" class="slide level2 smaller scrollable">
+<h2>Table of Content</h2>
+<p>This presentation is organised into the following sections:</p>
+<div class="columns">
+<div class="column" style="width:50%;">
+<ol type="1">
+<li><p><a href="#/introduction">Introduction</a><br>
+</p></li>
+<li><p><a href="#/significance-of-using-r">Significance of Using R</a><br>
+</p></li>
+<li><p><a href="#/r-script-and-replication-workflow">R Script and Replication Workflow</a><br>
+</p></li>
+<li><p><a href="#/clean-start-environment-setup">Clean Start: Environment Setup</a></p></li>
+<li><p><a href="#/required-r-packages">Required R Packages</a></p></li>
+<li><p><a href="#/replication-of-figure-1-and-figure-2">Replication of Figure 1 and Figure 2</a></p></li>
+<li><p><a href="#/hurdles-encountered">Hurdles Encountered</a></p></li>
+</ol>
+</div></div>
+</section>
+<section id="abstract" class="slide level2 smaller">
+<h2>Abstract</h2>
+<p>This project replicates Figure 1 and Figure 2 from Hassan et al.’s paper <em>Text as Data in Economic Analysis</em>. The original study demonstrates how corporate earnings-call transcripts can be used as textual data to measure economic risk, exposure, and sentiment.</p>
+<p>Using R, this project reproduces selected visualisations that show overall risk, Brexit-related risk, and topic-specific sentiment across major economic events such as Covid-19, Russia’s invasion of Ukraine, Brexit, and artificial intelligence. The replication process highlights how unstructured text can be converted into structured quantitative measures and presented through clear graphical analysis.</p>
+</section>
+<section id="introduction" class="slide level2 smaller">
+<h2>Introduction</h2>
+<p>This project focuses on the replication of selected figures from the research paper <em>Text as Data in Economic Analysis</em> by Hassan et al.&nbsp;(2025).</p>
+<p>The paper shows how corporate earnings-call transcripts can be transformed into measurable economic indicators such as:</p>
+<ul>
+<li>Risk</li>
+<li>Exposure</li>
+<li>Sentiment</li>
+</ul>
+<p>By analyzing unstructured corporate text, the authors capture firms’ perceptions of major economic shocks, including financial crises, Brexit, Covid-19, geopolitical events, inflation, and artificial intelligence.</p>
+</section>
+<section id="significance-of-using-r" class="slide level2 smaller">
+<h2>Significance of using R</h2>
+<p>R is highly useful for this project because it provides powerful tools for:</p>
+<ul>
+<li>Data cleaning</li>
+<li>Statistical analysis</li>
+<li>Text-related data processing</li>
+<li>Data aggregation</li>
+<li>Publication-quality visualisation</li>
+</ul>
+<p>Important packages used in the script include <code>tidyverse</code>, <code>ggplot2</code>, <code>data.table</code>, <code>janitor</code>, <code>lubridate</code>, <code>patchwork</code>, <code>scales</code>, and <code>stringr</code>.</p>
+</section>
+<section id="r-and-reproducibility" class="slide level2 smaller">
+<h2>R and reproducibility</h2>
+<p>R supports transparent and reproducible research workflows.</p>
+<p>In this project, R made it possible to document each step clearly:</p>
+<ul>
+<li>Importing CSV files</li>
+<li>Cleaning and standardizing variables</li>
+<li>Calculating risk and sentiment measures</li>
+<li>Creating panel figures</li>
+<li>Saving high-resolution outputs</li>
+</ul>
+<p>This is important in academic research because results should be accurate, consistent, and repeatable.</p>
+</section>
+<section id="replication-script-for-figure-1-and-figure-2-text-based-risk-and-sentiment-analysis" class="slide level2 smaller scrollable">
+<h2>Replication Script for Figure 1 and Figure 2: Text-Based Risk and Sentiment Analysis</h2>
+<p>The script follows a structured workflow:</p>
+<ol type="1">
+<li>Cleans the R environment</li>
+<li>Loads required packages</li>
+<li>Sets project, data, and output folders</li>
+<li>Imports topic-level CSV files</li>
+<li>Cleans and standardizes data</li>
+<li>Create Panels for Figure 1 and Figure 2</li>
+<li>Saves the final figures as PNG files</li>
+</ol>
+</section>
+<section id="running-the-r-script" class="slide level2 smaller">
+<h2>Running the R script</h2>
+<h4 id="start-fresh-clean-memory-environment-plots-and-packages">START FRESH: CLEAN MEMORY, ENVIRONMENT, PLOTS, AND PACKAGES</h4>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href=""></a><span class="co"># ============================================================</span></span>
+<span id="cb1-2"><a href=""></a><span class="co"># 0. START FRESH: CLEAN MEMORY, ENVIRONMENT, PLOTS, AND PACKAGES</span></span>
+<span id="cb1-3"><a href=""></a><span class="co"># ============================================================</span></span>
+<span id="cb1-4"><a href=""></a></span>
+<span id="cb1-5"><a href=""></a><span class="co"># Clear all objects from the Global Environment.</span></span>
+<span id="cb1-6"><a href=""></a><span class="fu">rm</span>(<span class="at">list =</span> <span class="fu">ls</span>(<span class="at">envir =</span> .GlobalEnv), <span class="at">envir =</span> .GlobalEnv)</span>
+<span id="cb1-7"><a href=""></a></span>
+<span id="cb1-8"><a href=""></a><span class="co"># Clear the RStudio console.</span></span>
+<span id="cb1-9"><a href=""></a><span class="fu">cat</span>(<span class="st">"</span><span class="sc">\014</span><span class="st">"</span>)</span>
+<span id="cb1-10"><a href=""></a></span>
+<span id="cb1-11"><a href=""></a><span class="co"># Close all open plots.</span></span>
+<span id="cb1-12"><a href=""></a><span class="fu">graphics.off</span>()</span>
+<span id="cb1-13"><a href=""></a></span>
+<span id="cb1-14"><a href=""></a><span class="co"># Free unused memory.</span></span>
+<span id="cb1-15"><a href=""></a><span class="fu">gc</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>This setup section was included to make sure the R project starts in a clean, reproducible, and stable environment. First, I cleared all objects from the Global Environment so that no old variables or datasets from previous work could affect the results. I also cleared the RStudio console and closed all open plots to keep the workspace organized and easier to follow during execution.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href=""></a><span class="co"># Detach extra packages from the search path.</span></span>
+<span id="cb2-2"><a href=""></a><span class="co"># Do NOT use unload = TRUE because it can break compiled packages like data.table.</span></span>
+<span id="cb2-3"><a href=""></a>base_packages <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb2-4"><a href=""></a>  <span class="st">"package:stats"</span>,</span>
+<span id="cb2-5"><a href=""></a>  <span class="st">"package:graphics"</span>,</span>
+<span id="cb2-6"><a href=""></a>  <span class="st">"package:grDevices"</span>,</span>
+<span id="cb2-7"><a href=""></a>  <span class="st">"package:utils"</span>,</span>
+<span id="cb2-8"><a href=""></a>  <span class="st">"package:datasets"</span>,</span>
+<span id="cb2-9"><a href=""></a>  <span class="st">"package:methods"</span>,</span>
+<span id="cb2-10"><a href=""></a>  <span class="st">"package:base"</span></span>
+<span id="cb2-11"><a href=""></a>)</span>
+<span id="cb2-12"><a href=""></a></span>
+<span id="cb2-13"><a href=""></a>attached_packages <span class="ot">&lt;-</span> <span class="fu">grep</span>(<span class="st">"^package:"</span>, <span class="fu">search</span>(), <span class="at">value =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-14"><a href=""></a>packages_to_detach <span class="ot">&lt;-</span> <span class="fu">setdiff</span>(attached_packages, base_packages)</span>
+<span id="cb2-15"><a href=""></a></span>
+<span id="cb2-16"><a href=""></a><span class="cf">if</span> (<span class="fu">length</span>(packages_to_detach) <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb2-17"><a href=""></a>  <span class="cf">for</span> (pkg <span class="cf">in</span> <span class="fu">rev</span>(packages_to_detach)) {</span>
+<span id="cb2-18"><a href=""></a>    <span class="fu">try</span>(<span class="fu">detach</span>(pkg, <span class="at">character.only =</span> <span class="cn">TRUE</span>, <span class="at">unload =</span> <span class="cn">FALSE</span>, <span class="at">force =</span> <span class="cn">TRUE</span>), <span class="at">silent =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-19"><a href=""></a>  }</span>
+<span id="cb2-20"><a href=""></a>}</span>
+<span id="cb2-21"><a href=""></a></span>
+<span id="cb2-22"><a href=""></a><span class="co"># Remove cleanup helper objects.</span></span>
+<span id="cb2-23"><a href=""></a><span class="fu">rm</span>(base_packages, attached_packages, packages_to_detach)</span>
+<span id="cb2-24"><a href=""></a></span>
+<span id="cb2-25"><a href=""></a><span class="co"># Free memory again.</span></span>
+<span id="cb2-26"><a href=""></a><span class="fu">gc</span>()</span>
+<span id="cb2-27"><a href=""></a></span>
+<span id="cb2-28"><a href=""></a><span class="co"># Set seed for reproducibility.</span></span>
+<span id="cb2-29"><a href=""></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>I used <code>gc()</code> to free unused memory, which is helpful when working with larger datasets or multiple plots. I also detached extra packages from the search path while keeping the base R packages loaded. This was done to reduce package conflicts and avoid unexpected behavior caused by functions with the same name from different packages. I avoided using <code>unload = TRUE</code> because some compiled packages, such as <code>data.table</code>, can break or behave unpredictably when fully unloaded during a session. After cleaning the workspace, I removed the helper objects used during the cleanup process and ran garbage collection again to free memory. I then set a seed using <code>set.seed(123)</code> so that any random operations in the project would produce the same results each time the code is run. This improves reproducibility.</p>
+</section>
+<section class="slide level2">
+
+<h4 id="install-and-load-required-packages-set-project-folders">INSTALL AND LOAD REQUIRED PACKAGES &amp; SET PROJECT FOLDERS</h4>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href=""></a><span class="co"># ============================================================</span></span>
+<span id="cb3-2"><a href=""></a><span class="co"># 1. INSTALL AND LOAD REQUIRED PACKAGES</span></span>
+<span id="cb3-3"><a href=""></a><span class="co"># ============================================================</span></span>
+<span id="cb3-4"><a href=""></a></span>
+<span id="cb3-5"><a href=""></a><span class="co"># List all packages needed for this project.</span></span>
+<span id="cb3-6"><a href=""></a><span class="co"># tidyverse: data cleaning, transformation, and ggplot2 graphics</span></span>
+<span id="cb3-7"><a href=""></a><span class="co"># data.table: fast CSV import with fread()</span></span>
+<span id="cb3-8"><a href=""></a><span class="co"># janitor: clean column names</span></span>
+<span id="cb3-9"><a href=""></a><span class="co"># lubridate: work with dates, years, and quarters</span></span>
+<span id="cb3-10"><a href=""></a><span class="co"># patchwork: combine multiple ggplot figures</span></span>
+<span id="cb3-11"><a href=""></a><span class="co"># scales: improve axis formatting</span></span>
+<span id="cb3-12"><a href=""></a><span class="co"># stringr: detect and clean text patterns</span></span>
+<span id="cb3-13"><a href=""></a>packages <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb3-14"><a href=""></a>  <span class="st">"tidyverse"</span>,</span>
+<span id="cb3-15"><a href=""></a>  <span class="st">"data.table"</span>,</span>
+<span id="cb3-16"><a href=""></a>  <span class="st">"janitor"</span>,</span>
+<span id="cb3-17"><a href=""></a>  <span class="st">"lubridate"</span>,</span>
+<span id="cb3-18"><a href=""></a>  <span class="st">"patchwork"</span>,</span>
+<span id="cb3-19"><a href=""></a>  <span class="st">"scales"</span>,</span>
+<span id="cb3-20"><a href=""></a>  <span class="st">"stringr"</span></span>
+<span id="cb3-21"><a href=""></a>)</span>
+<span id="cb3-22"><a href=""></a></span>
+<span id="cb3-23"><a href=""></a><span class="co"># Install a package only if it is missing from the computer.</span></span>
+<span id="cb3-24"><a href=""></a>install_if_missing <span class="ot">&lt;-</span> <span class="cf">function</span>(pkg) {</span>
+<span id="cb3-25"><a href=""></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">requireNamespace</span>(pkg, <span class="at">quietly =</span> <span class="cn">TRUE</span>)) {</span>
+<span id="cb3-26"><a href=""></a>    <span class="fu">install.packages</span>(pkg)</span>
+<span id="cb3-27"><a href=""></a>  }</span>
+<span id="cb3-28"><a href=""></a>}</span>
+<span id="cb3-29"><a href=""></a></span>
+<span id="cb3-30"><a href=""></a><span class="co"># Check every package in the list and install missing ones.</span></span>
+<span id="cb3-31"><a href=""></a><span class="fu">invisible</span>(<span class="fu">lapply</span>(packages, install_if_missing))</span>
+<span id="cb3-32"><a href=""></a></span>
+<span id="cb3-33"><a href=""></a><span class="co"># Load all required packages.</span></span>
+<span id="cb3-34"><a href=""></a><span class="co"># suppressPackageStartupMessages() keeps the output clean for presentation.</span></span>
+<span id="cb3-35"><a href=""></a><span class="fu">suppressPackageStartupMessages</span>({</span>
+<span id="cb3-36"><a href=""></a>  <span class="fu">library</span>(tidyverse)</span>
+<span id="cb3-37"><a href=""></a>  <span class="fu">library</span>(data.table)</span>
+<span id="cb3-38"><a href=""></a>  <span class="fu">library</span>(janitor)</span>
+<span id="cb3-39"><a href=""></a>  <span class="fu">library</span>(lubridate)</span>
+<span id="cb3-40"><a href=""></a>  <span class="fu">library</span>(patchwork)</span>
+<span id="cb3-41"><a href=""></a>  <span class="fu">library</span>(scales)</span>
+<span id="cb3-42"><a href=""></a>  <span class="fu">library</span>(stringr)</span>
+<span id="cb3-43"><a href=""></a>})</span>
+<span id="cb3-44"><a href=""></a><span class="co"># ============================================================</span></span>
+<span id="cb3-45"><a href=""></a><span class="co"># 2. SET PROJECT FOLDERS</span></span>
+<span id="cb3-46"><a href=""></a><span class="co"># ============================================================</span></span>
+<span id="cb3-47"><a href=""></a></span>
+<span id="cb3-48"><a href=""></a><span class="co"># Set the main project folder.</span></span>
+<span id="cb3-49"><a href=""></a><span class="co"># Change this path if your data are stored somewhere else.</span></span>
+<span id="cb3-50"><a href=""></a>project_dir <span class="ot">&lt;-</span> <span class="st">"B:/Data_science_BA/Raw_Data"</span></span>
+<span id="cb3-51"><a href=""></a></span>
+<span id="cb3-52"><a href=""></a><span class="co"># If the folder above is not found, use the current working directory instead.</span></span>
+<span id="cb3-53"><a href=""></a><span class="co"># This makes the script easier to run from a Quarto or R Markdown project folder.</span></span>
+<span id="cb3-54"><a href=""></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">dir.exists</span>(project_dir)) {</span>
+<span id="cb3-55"><a href=""></a>  <span class="fu">warning</span>(</span>
+<span id="cb3-56"><a href=""></a>    <span class="st">"The folder 'B:/Data_science_BA/Raw_Data' was not found. "</span>,</span>
+<span id="cb3-57"><a href=""></a>    <span class="st">"Using the current working directory instead: "</span>, <span class="fu">getwd</span>()</span>
+<span id="cb3-58"><a href=""></a>  )</span>
+<span id="cb3-59"><a href=""></a>  project_dir <span class="ot">&lt;-</span> <span class="fu">getwd</span>()</span>
+<span id="cb3-60"><a href=""></a>}</span>
+<span id="cb3-61"><a href=""></a></span>
+<span id="cb3-62"><a href=""></a><span class="co"># Set the working directory to the project folder.</span></span>
+<span id="cb3-63"><a href=""></a><span class="fu">setwd</span>(project_dir)</span>
+<span id="cb3-64"><a href=""></a></span>
+<span id="cb3-65"><a href=""></a><span class="co"># Define the folder containing the NL Analytics CSV files.</span></span>
+<span id="cb3-66"><a href=""></a>nl_dir <span class="ot">&lt;-</span> <span class="fu">file.path</span>(project_dir, <span class="st">"nl_analytics"</span>)</span>
+<span id="cb3-67"><a href=""></a></span>
+<span id="cb3-68"><a href=""></a><span class="co"># Define the folder where final figures will be saved.</span></span>
+<span id="cb3-69"><a href=""></a>output_dir <span class="ot">&lt;-</span> <span class="fu">file.path</span>(project_dir, <span class="st">"output"</span>)</span>
+<span id="cb3-70"><a href=""></a></span>
+<span id="cb3-71"><a href=""></a><span class="co"># Create the output folder if it does not already exist.</span></span>
+<span id="cb3-72"><a href=""></a><span class="fu">dir.create</span>(output_dir, <span class="at">showWarnings =</span> <span class="cn">FALSE</span>, <span class="at">recursive =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb3-73"><a href=""></a></span>
+<span id="cb3-74"><a href=""></a><span class="co"># Stop the script early if the expected data folder is missing.</span></span>
+<span id="cb3-75"><a href=""></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">dir.exists</span>(nl_dir)) {</span>
+<span id="cb3-76"><a href=""></a>  <span class="fu">stop</span>(<span class="st">"Data folder not found: "</span>, nl_dir)</span>
+<span id="cb3-77"><a href=""></a>}</span>
+<span id="cb3-78"><a href=""></a></span>
+<span id="cb3-79"><a href=""></a><span class="co"># Print the folders being used so the audience can see the data source and output location.</span></span>
+<span id="cb3-80"><a href=""></a><span class="fu">message</span>(<span class="st">"Project folder: "</span>, project_dir)</span>
+<span id="cb3-81"><a href=""></a><span class="fu">message</span>(<span class="st">"Data folder: "</span>, nl_dir)</span>
+<span id="cb3-82"><a href=""></a><span class="fu">message</span>(<span class="st">"Output folder: "</span>, output_dir)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Finally, I created a list of required packages for the project and wrote a small function to install any missing packages automatically. This makes the code easier to run on a new computer without manually checking package availability. The selected packages were necessary for the project: <code>tidyverse</code> was used for data cleaning, transformation, and visualization; <code>data.table</code> for fast CSV import; <code>janitor</code> for cleaning column names; <code>lubridate</code> for handling dates; <code>patchwork</code> for combining plots; <code>scales</code> for better axis formatting; and <code>stringr</code> for working with text patterns. I used <code>suppressPackageStartupMessages()</code> when loading the packages to keep the output clean and professional for presentation. In this section, I set the main project folders so that R knows where to find the raw data and where to save the final outputs. I also added checks to make the script more reliable: if the main folder is not found, the code uses the current working directory, and if the required <code>nl_analytics</code> data folder is missing, the script stops with a clear error message. This helps avoid running the analysis with missing or incorrect data paths.</p>
+</section>
+<section class="slide level2">
+
+<h4 id="define-helper-functions">DEFINE HELPER FUNCTIONS</h4>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href=""></a><span class="co"># ============================================================</span></span>
+<span id="cb4-2"><a href=""></a><span class="co"># 3. DEFINE HELPER FUNCTIONS</span></span>
+<span id="cb4-3"><a href=""></a><span class="co"># ============================================================</span></span>
+<span id="cb4-4"><a href=""></a></span>
+<span id="cb4-5"><a href=""></a><span class="co"># This function reads one topic CSV file from the nl_analytics folder.</span></span>
+<span id="cb4-6"><a href=""></a><span class="co"># It also cleans column names so they are easier to use in R.</span></span>
+<span id="cb4-7"><a href=""></a>read_topic_csv <span class="ot">&lt;-</span> <span class="cf">function</span>(file_name) {</span>
+<span id="cb4-8"><a href=""></a>  file_path <span class="ot">&lt;-</span> <span class="fu">file.path</span>(nl_dir, file_name)</span>
+<span id="cb4-9"><a href=""></a>  </span>
+<span id="cb4-10"><a href=""></a>  <span class="co"># Stop with a clear message if the file is missing.</span></span>
+<span id="cb4-11"><a href=""></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">file.exists</span>(file_path)) {</span>
+<span id="cb4-12"><a href=""></a>    <span class="fu">stop</span>(<span class="st">"File not found: "</span>, file_path)</span>
+<span id="cb4-13"><a href=""></a>  }</span>
+<span id="cb4-14"><a href=""></a>  </span>
+<span id="cb4-15"><a href=""></a>  <span class="co"># fread() is used because it is fast for large CSV files.</span></span>
+<span id="cb4-16"><a href=""></a>  data <span class="ot">&lt;-</span> data.table<span class="sc">::</span><span class="fu">fread</span>(file_path)</span>
+<span id="cb4-17"><a href=""></a>  </span>
+<span id="cb4-18"><a href=""></a>  <span class="co"># clean_names() converts names like "Company Name" into "company_name".</span></span>
+<span id="cb4-19"><a href=""></a>  data <span class="ot">&lt;-</span> janitor<span class="sc">::</span><span class="fu">clean_names</span>(data)</span>
+<span id="cb4-20"><a href=""></a>  </span>
+<span id="cb4-21"><a href=""></a>  <span class="fu">return</span>(data)</span>
+<span id="cb4-22"><a href=""></a>}</span>
+<span id="cb4-23"><a href=""></a></span>
+<span id="cb4-24"><a href=""></a></span>
+<span id="cb4-25"><a href=""></a><span class="co"># This function standardizes each topic data file.</span></span>
+<span id="cb4-26"><a href=""></a><span class="co"># It creates common columns such as topic, year, quarter, firm, country, and industry.</span></span>
+<span id="cb4-27"><a href=""></a>clean_topic_file <span class="ot">&lt;-</span> <span class="cf">function</span>(df, topic_name) {</span>
+<span id="cb4-28"><a href=""></a>  </span>
+<span id="cb4-29"><a href=""></a>  df <span class="ot">&lt;-</span> janitor<span class="sc">::</span><span class="fu">clean_names</span>(df)</span>
+<span id="cb4-30"><a href=""></a>  </span>
+<span id="cb4-31"><a href=""></a>  out <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span></span>
+<span id="cb4-32"><a href=""></a>    <span class="fu">mutate</span>(</span>
+<span id="cb4-33"><a href=""></a>      <span class="co"># Add topic name so each row can be identified after combining data.</span></span>
+<span id="cb4-34"><a href=""></a>      <span class="at">topic =</span> topic_name,</span>
+<span id="cb4-35"><a href=""></a>      </span>
+<span id="cb4-36"><a href=""></a>      <span class="co"># Convert quarterly date into Date format and extract year/quarter.</span></span>
+<span id="cb4-37"><a href=""></a>      <span class="at">date_q =</span> <span class="fu">as.Date</span>(date_q),</span>
+<span id="cb4-38"><a href=""></a>      <span class="at">year =</span> lubridate<span class="sc">::</span><span class="fu">year</span>(date_q),</span>
+<span id="cb4-39"><a href=""></a>      <span class="at">quarter =</span> lubridate<span class="sc">::</span><span class="fu">quarter</span>(date_q),</span>
+<span id="cb4-40"><a href=""></a>      <span class="at">qtr =</span> <span class="fu">paste0</span>(year, <span class="st">" Q"</span>, quarter),</span>
+<span id="cb4-41"><a href=""></a>      <span class="at">qtr_date =</span> date_q,</span>
+<span id="cb4-42"><a href=""></a>      </span>
+<span id="cb4-43"><a href=""></a>      <span class="co"># Convert main text measures into numeric form.</span></span>
+<span id="cb4-44"><a href=""></a>      <span class="at">topic_exposure =</span> <span class="fu">as.numeric</span>(exposure),</span>
+<span id="cb4-45"><a href=""></a>      <span class="at">topic_sentiment =</span> <span class="fu">as.numeric</span>(sentiment),</span>
+<span id="cb4-46"><a href=""></a>      <span class="at">topic_risk =</span> <span class="fu">as.numeric</span>(risk),</span>
+<span id="cb4-47"><a href=""></a>      </span>
+<span id="cb4-48"><a href=""></a>      <span class="co"># Create readable firm and country variables.</span></span>
+<span id="cb4-49"><a href=""></a>      <span class="at">firm =</span> <span class="fu">as.character</span>(company_name),</span>
+<span id="cb4-50"><a href=""></a>      <span class="at">country =</span> <span class="fu">as.character</span>(headquarterscountry),</span>
+<span id="cb4-51"><a href=""></a>      </span>
+<span id="cb4-52"><a href=""></a>      <span class="co"># Convert possible industry columns into text.</span></span>
+<span id="cb4-53"><a href=""></a>      <span class="at">trbc_text =</span> <span class="fu">as.character</span>(trbc),</span>
+<span id="cb4-54"><a href=""></a>      <span class="at">business_sector_text =</span> <span class="fu">as.character</span>(business_sector),</span>
+<span id="cb4-55"><a href=""></a>      <span class="at">economic_sector_text =</span> <span class="fu">as.character</span>(economic_sector),</span>
+<span id="cb4-56"><a href=""></a>      </span>
+<span id="cb4-57"><a href=""></a>      <span class="co"># Use the best available industry label.</span></span>
+<span id="cb4-58"><a href=""></a>      <span class="at">industry =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
+<span id="cb4-59"><a href=""></a>        <span class="sc">!</span><span class="fu">is.na</span>(business_sector_text) <span class="sc">&amp;</span> business_sector_text <span class="sc">!=</span> <span class="st">""</span> <span class="sc">~</span> business_sector_text,</span>
+<span id="cb4-60"><a href=""></a>        <span class="sc">!</span><span class="fu">is.na</span>(economic_sector_text) <span class="sc">&amp;</span> economic_sector_text <span class="sc">!=</span> <span class="st">""</span> <span class="sc">~</span> economic_sector_text,</span>
+<span id="cb4-61"><a href=""></a>        <span class="sc">!</span><span class="fu">is.na</span>(trbc_text) <span class="sc">&amp;</span> trbc_text <span class="sc">!=</span> <span class="st">""</span> <span class="sc">~</span> trbc_text,</span>
+<span id="cb4-62"><a href=""></a>        <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_character_</span></span>
+<span id="cb4-63"><a href=""></a>      )</span>
+<span id="cb4-64"><a href=""></a>    ) <span class="sc">%&gt;%</span></span>
+<span id="cb4-65"><a href=""></a>    <span class="fu">select</span>(</span>
+<span id="cb4-66"><a href=""></a>      topic, firm, country, industry,</span>
+<span id="cb4-67"><a href=""></a>      date_q, qtr_date, year, quarter, qtr,</span>
+<span id="cb4-68"><a href=""></a>      topic_exposure, topic_sentiment, topic_risk,</span>
+<span id="cb4-69"><a href=""></a>      <span class="fu">any_of</span>(<span class="fu">c</span>(<span class="st">"positive"</span>, <span class="st">"negative"</span>, <span class="st">"nr_of_sentences"</span>)),</span>
+<span id="cb4-70"><a href=""></a>      <span class="fu">everything</span>()</span>
+<span id="cb4-71"><a href=""></a>    )</span>
+<span id="cb4-72"><a href=""></a>  </span>
+<span id="cb4-73"><a href=""></a>  <span class="fu">return</span>(out)</span>
+<span id="cb4-74"><a href=""></a>}</span>
+<span id="cb4-75"><a href=""></a></span>
+<span id="cb4-76"><a href=""></a></span>
+<span id="cb4-77"><a href=""></a><span class="co"># This function formats dates as year plus Roman-numeral quarter.</span></span>
+<span id="cb4-78"><a href=""></a><span class="co"># Example: 2020 Q1 becomes 2020:I.</span></span>
+<span id="cb4-79"><a href=""></a>quarter_label <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
+<span id="cb4-80"><a href=""></a>  q <span class="ot">&lt;-</span> lubridate<span class="sc">::</span><span class="fu">quarter</span>(x)</span>
+<span id="cb4-81"><a href=""></a>  roman_q <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"I"</span>, <span class="st">"II"</span>, <span class="st">"III"</span>, <span class="st">"IV"</span>)[q]</span>
+<span id="cb4-82"><a href=""></a>  <span class="fu">paste0</span>(lubridate<span class="sc">::</span><span class="fu">year</span>(x), <span class="st">":"</span>, roman_q)</span>
+<span id="cb4-83"><a href=""></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>I defined helper functions to avoid repeating the same code many times and to make the data preparation process more structured. Since the project uses several topic CSV files from the <code>nl_analytics</code> folder, I created functions that can read, clean, and standardize each file in the same way.</p>
+<p>The first function, <code>read_topic_csv()</code>, reads one CSV file from the project folder. It creates the full file path, checks whether the file exists, and stops with a clear error message if the file is missing. I used <code>data.table::fread()</code> because it is faster than base R functions when reading larger CSV files. After importing the file, I used <code>janitor::clean_names()</code> to convert column names into a consistent format, such as changing <code>"Company Name"</code> into <code>company_name</code>. This makes the columns easier to use later in the code.</p>
+<p>The second function, <code>clean_topic_file()</code>, standardizes each topic dataset. This was necessary because all topic files need to have the same important columns before they can be combined. The function adds a <code>topic</code> column so that each row can still be identified after merging datasets. It also converts the quarterly date into a proper date format and extracts the year, quarter, and quarter label. In addition, it converts exposure, sentiment, and risk values into numeric variables so they can be used for calculations and plots.</p>
+<p>I also created readable variables for firm, country, and industry. Since industry information may appear in different columns, I used <code>case_when()</code> to choose the best available industry label from business sector, economic sector, or TRBC. This makes the dataset more complete and consistent.</p>
+<p>The final helper function, <code>quarter_label()</code>, formats dates into a clearer quarter label using Roman numerals, such as changing 2020 Q1 into <code>2020:I</code>. This improves the readability of time labels in tables and visualizations.</p>
+<p>Overall, this section was written to make the data cleaning process reproducible, reduce repeated code, prevent errors, and prepare all topic files in a consistent structure for later analysis.</p>
+</section>
+<section class="slide level2">
+
+<h4 id="import-all-csv-files-clean-and-standardize-topic-data">IMPORT ALL CSV FILES &amp; CLEAN AND STANDARDIZE TOPIC DATA</h4>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href=""></a><span class="co"># ============================================================</span></span>
+<span id="cb5-2"><a href=""></a><span class="co"># 4. IMPORT ALL CSV FILES NEEDED FOR FIGURE 1 AND FIGURE 2</span></span>
+<span id="cb5-3"><a href=""></a><span class="co"># ============================================================</span></span>
+<span id="cb5-4"><a href=""></a></span>
+<span id="cb5-5"><a href=""></a><span class="co"># Import the topic-level data files.</span></span>
+<span id="cb5-6"><a href=""></a><span class="co"># These files are used to calculate exposure, risk, and sentiment measures.</span></span>
+<span id="cb5-7"><a href=""></a>brexit       <span class="ot">&lt;-</span> <span class="fu">read_topic_csv</span>(<span class="st">"brexit.csv"</span>)</span>
+<span id="cb5-8"><a href=""></a>covid        <span class="ot">&lt;-</span> <span class="fu">read_topic_csv</span>(<span class="st">"covid.csv"</span>)</span>
+<span id="cb5-9"><a href=""></a>inflation    <span class="ot">&lt;-</span> <span class="fu">read_topic_csv</span>(<span class="st">"inflation.csv"</span>)</span>
+<span id="cb5-10"><a href=""></a>ml_ai        <span class="ot">&lt;-</span> <span class="fu">read_topic_csv</span>(<span class="st">"ml_ai.csv"</span>)</span>
+<span id="cb5-11"><a href=""></a>ml_ai_uncond <span class="ot">&lt;-</span> <span class="fu">read_topic_csv</span>(<span class="st">"ml_ai_unconditional.csv"</span>)</span>
+<span id="cb5-12"><a href=""></a>russia       <span class="ot">&lt;-</span> <span class="fu">read_topic_csv</span>(<span class="st">"russia.csv"</span>)</span>
+<span id="cb5-13"><a href=""></a>russian_war  <span class="ot">&lt;-</span> <span class="fu">read_topic_csv</span>(<span class="st">"russian_war.csv"</span>)</span>
+<span id="cb5-14"><a href=""></a>supplychain  <span class="ot">&lt;-</span> <span class="fu">read_topic_csv</span>(<span class="st">"supplychain.csv"</span>)</span>
+<span id="cb5-15"><a href=""></a>trade        <span class="ot">&lt;-</span> <span class="fu">read_topic_csv</span>(<span class="st">"trade.csv"</span>)</span>
+<span id="cb5-16"><a href=""></a></span>
+<span id="cb5-17"><a href=""></a><span class="co"># Show a short message to confirm successful import.</span></span>
+<span id="cb5-18"><a href=""></a><span class="fu">message</span>(<span class="st">"All required CSV files were imported successfully."</span>)</span>
+<span id="cb5-19"><a href=""></a></span>
+<span id="cb5-20"><a href=""></a></span>
+<span id="cb5-21"><a href=""></a><span class="co"># ============================================================</span></span>
+<span id="cb5-22"><a href=""></a><span class="co"># 5. CLEAN AND STANDARDIZE TOPIC DATA</span></span>
+<span id="cb5-23"><a href=""></a><span class="co"># ============================================================</span></span>
+<span id="cb5-24"><a href=""></a></span>
+<span id="cb5-25"><a href=""></a><span class="co"># Apply the same cleaning function to each topic file.</span></span>
+<span id="cb5-26"><a href=""></a>ai_clean          <span class="ot">&lt;-</span> <span class="fu">clean_topic_file</span>(ml_ai, <span class="st">"AI"</span>)</span>
+<span id="cb5-27"><a href=""></a>brexit_clean      <span class="ot">&lt;-</span> <span class="fu">clean_topic_file</span>(brexit, <span class="st">"Brexit"</span>)</span>
+<span id="cb5-28"><a href=""></a>covid_clean       <span class="ot">&lt;-</span> <span class="fu">clean_topic_file</span>(covid, <span class="st">"Covid"</span>)</span>
+<span id="cb5-29"><a href=""></a>russia_clean      <span class="ot">&lt;-</span> <span class="fu">clean_topic_file</span>(russia, <span class="st">"Russia"</span>)</span>
+<span id="cb5-30"><a href=""></a>inflation_clean   <span class="ot">&lt;-</span> <span class="fu">clean_topic_file</span>(inflation, <span class="st">"Inflation"</span>)</span>
+<span id="cb5-31"><a href=""></a>supplychain_clean <span class="ot">&lt;-</span> <span class="fu">clean_topic_file</span>(supplychain, <span class="st">"Supply chain"</span>)</span>
+<span id="cb5-32"><a href=""></a>trade_clean       <span class="ot">&lt;-</span> <span class="fu">clean_topic_file</span>(trade, <span class="st">"Trade"</span>)</span>
+<span id="cb5-33"><a href=""></a></span>
+<span id="cb5-34"><a href=""></a><span class="co"># Check that dates were converted correctly.</span></span>
+<span id="cb5-35"><a href=""></a><span class="fu">message</span>(<span class="st">"Missing AI dates: "</span>, <span class="fu">sum</span>(<span class="fu">is.na</span>(ai_clean<span class="sc">$</span>qtr_date)))</span>
+<span id="cb5-36"><a href=""></a><span class="fu">message</span>(<span class="st">"Missing Brexit dates: "</span>, <span class="fu">sum</span>(<span class="fu">is.na</span>(brexit_clean<span class="sc">$</span>qtr_date)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>After setting the folders, I imported all CSV files needed for Figure 1 and Figure 2. These files contain the topic-level measures for AI, Brexit, covid, inflation, Russia, supply chain, and trade. Then, I applied the same cleaning function to each file so that all data sets have consistent column names, date variables, topic labels, and numerical measures. This makes the data sets ready to be combined and used for the final analysis and visualizations.</p>
+</section>
+<section class="slide level2">
+
+<h4 id="figure-1-text-based-risk">FIGURE 1: TEXT-BASED RISK</h4>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href=""></a><span class="co"># ============================================================</span></span>
+<span id="cb6-2"><a href=""></a><span class="co"># FIGURE 1: TEXT-BASED RISK</span></span>
+<span id="cb6-3"><a href=""></a><span class="co"># Panel A: Overall risk</span></span>
+<span id="cb6-4"><a href=""></a><span class="co"># Panel B: Brexit risk</span></span>
+<span id="cb6-5"><a href=""></a><span class="co"># ============================================================</span></span>
+<span id="cb6-6"><a href=""></a></span>
+<span id="cb6-7"><a href=""></a><span class="co"># ============================================================</span></span>
+<span id="cb6-8"><a href=""></a><span class="co"># 6. PREPARE FIGURE 1, PANEL A: OVERALL RISK</span></span>
+<span id="cb6-9"><a href=""></a><span class="co"># ============================================================</span></span>
+<span id="cb6-10"><a href=""></a></span>
+<span id="cb6-11"><a href=""></a><span class="co"># The unconditional risk file does not contain date_q.</span></span>
+<span id="cb6-12"><a href=""></a><span class="co"># Therefore, we take date_q from the AI file using earningscall_id as the matching key.</span></span>
+<span id="cb6-13"><a href=""></a>uncond_clean <span class="ot">&lt;-</span> ml_ai_uncond <span class="sc">%&gt;%</span></span>
+<span id="cb6-14"><a href=""></a>  janitor<span class="sc">::</span><span class="fu">clean_names</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb6-15"><a href=""></a>  <span class="fu">mutate</span>(</span>
+<span id="cb6-16"><a href=""></a>    <span class="at">earningscall_id =</span> <span class="fu">as.character</span>(earningscall_id),</span>
+<span id="cb6-17"><a href=""></a>    <span class="at">nr_of_sentences =</span> <span class="fu">as.numeric</span>(nr_of_sentences),</span>
+<span id="cb6-18"><a href=""></a>    <span class="at">unconditional_risk_sentences_count =</span> <span class="fu">as.numeric</span>(unconditional_risk_sentences_count),</span>
+<span id="cb6-19"><a href=""></a>    </span>
+<span id="cb6-20"><a href=""></a>    <span class="co"># Convert risk sentence count into a percentage of all sentences in the call.</span></span>
+<span id="cb6-21"><a href=""></a>    <span class="at">overall_risk_pct =</span> <span class="dv">100</span> <span class="sc">*</span> unconditional_risk_sentences_count <span class="sc">/</span> nr_of_sentences</span>
+<span id="cb6-22"><a href=""></a>  )</span>
+<span id="cb6-23"><a href=""></a></span>
+<span id="cb6-24"><a href=""></a><span class="co"># Create a lookup table with earnings call ID and quarterly date.</span></span>
+<span id="cb6-25"><a href=""></a>date_lookup <span class="ot">&lt;-</span> ml_ai <span class="sc">%&gt;%</span></span>
+<span id="cb6-26"><a href=""></a>  janitor<span class="sc">::</span><span class="fu">clean_names</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb6-27"><a href=""></a>  <span class="fu">mutate</span>(</span>
+<span id="cb6-28"><a href=""></a>    <span class="at">earningscall_id =</span> <span class="fu">as.character</span>(earningscall_id),</span>
+<span id="cb6-29"><a href=""></a>    <span class="at">date_q =</span> <span class="fu">as.Date</span>(date_q),</span>
+<span id="cb6-30"><a href=""></a>    <span class="at">year =</span> lubridate<span class="sc">::</span><span class="fu">year</span>(date_q),</span>
+<span id="cb6-31"><a href=""></a>    <span class="at">quarter =</span> lubridate<span class="sc">::</span><span class="fu">quarter</span>(date_q),</span>
+<span id="cb6-32"><a href=""></a>    <span class="at">qtr_date =</span> date_q</span>
+<span id="cb6-33"><a href=""></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb6-34"><a href=""></a>  <span class="fu">select</span>(earningscall_id, qtr_date, year, quarter) <span class="sc">%&gt;%</span></span>
+<span id="cb6-35"><a href=""></a>  <span class="fu">distinct</span>()</span>
+<span id="cb6-36"><a href=""></a></span>
+<span id="cb6-37"><a href=""></a><span class="co"># Join the unconditional risk data with the date lookup table.</span></span>
+<span id="cb6-38"><a href=""></a>overall_risk_call_level <span class="ot">&lt;-</span> uncond_clean <span class="sc">%&gt;%</span></span>
+<span id="cb6-39"><a href=""></a>  <span class="fu">left_join</span>(date_lookup, <span class="at">by =</span> <span class="st">"earningscall_id"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb6-40"><a href=""></a>  <span class="fu">filter</span>(</span>
+<span id="cb6-41"><a href=""></a>    <span class="sc">!</span><span class="fu">is.na</span>(qtr_date),</span>
+<span id="cb6-42"><a href=""></a>    year <span class="sc">&gt;=</span> <span class="dv">2003</span>,</span>
+<span id="cb6-43"><a href=""></a>    year <span class="sc">&lt;=</span> <span class="dv">2023</span>,</span>
+<span id="cb6-44"><a href=""></a>    <span class="sc">!</span><span class="fu">is.na</span>(overall_risk_pct)</span>
+<span id="cb6-45"><a href=""></a>  )</span>
+<span id="cb6-46"><a href=""></a></span>
+<span id="cb6-47"><a href=""></a><span class="co"># Aggregate from earnings-call level to quarterly average risk.</span></span>
+<span id="cb6-48"><a href=""></a>fig1a <span class="ot">&lt;-</span> overall_risk_call_level <span class="sc">%&gt;%</span></span>
+<span id="cb6-49"><a href=""></a>  <span class="fu">group_by</span>(qtr_date) <span class="sc">%&gt;%</span></span>
+<span id="cb6-50"><a href=""></a>  <span class="fu">summarise</span>(</span>
+<span id="cb6-51"><a href=""></a>    <span class="at">overall_risk =</span> <span class="fu">mean</span>(overall_risk_pct, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb6-52"><a href=""></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
+<span id="cb6-53"><a href=""></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb6-54"><a href=""></a>  <span class="fu">arrange</span>(qtr_date)</span>
+<span id="cb6-55"><a href=""></a></span>
+<span id="cb6-56"><a href=""></a><span class="co"># Print a preview so the audience can see the structure of the prepared data.</span></span>
+<span id="cb6-57"><a href=""></a><span class="fu">message</span>(<span class="st">"Preview of Figure 1 Panel A data:"</span>)</span>
+<span id="cb6-58"><a href=""></a><span class="fu">print</span>(<span class="fu">head</span>(fig1a))</span>
+<span id="cb6-59"><a href=""></a></span>
+<span id="cb6-60"><a href=""></a></span>
+<span id="cb6-61"><a href=""></a><span class="co"># ============================================================</span></span>
+<span id="cb6-62"><a href=""></a><span class="co"># 7. PREPARE FIGURE 1, PANEL B: BREXIT RISK</span></span>
+<span id="cb6-63"><a href=""></a><span class="co"># ============================================================</span></span>
+<span id="cb6-64"><a href=""></a></span>
+<span id="cb6-65"><a href=""></a><span class="co"># Check whether Brexit risk is stored as a fraction or already as a percent.</span></span>
+<span id="cb6-66"><a href=""></a>risk_scale_check <span class="ot">&lt;-</span> <span class="fu">median</span>(<span class="fu">abs</span>(brexit_clean<span class="sc">$</span>topic_risk), <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb6-67"><a href=""></a></span>
+<span id="cb6-68"><a href=""></a><span class="co"># Stop if the risk column is empty or unreadable.</span></span>
+<span id="cb6-69"><a href=""></a><span class="cf">if</span> (<span class="fu">is.na</span>(risk_scale_check)) {</span>
+<span id="cb6-70"><a href=""></a>  <span class="fu">stop</span>(<span class="st">"Brexit topic_risk is all NA. Check the risk column in brexit.csv."</span>)</span>
+<span id="cb6-71"><a href=""></a>}</span>
+<span id="cb6-72"><a href=""></a></span>
+<span id="cb6-73"><a href=""></a><span class="co"># Convert Brexit risk to percentage scale if necessary.</span></span>
+<span id="cb6-74"><a href=""></a><span class="cf">if</span> (risk_scale_check <span class="sc">&gt;</span> <span class="dv">1</span>) {</span>
+<span id="cb6-75"><a href=""></a>  brexit_clean <span class="ot">&lt;-</span> brexit_clean <span class="sc">%&gt;%</span></span>
+<span id="cb6-76"><a href=""></a>    <span class="fu">mutate</span>(<span class="at">brexit_risk_pct =</span> topic_risk)</span>
+<span id="cb6-77"><a href=""></a>} <span class="cf">else</span> {</span>
+<span id="cb6-78"><a href=""></a>  brexit_clean <span class="ot">&lt;-</span> brexit_clean <span class="sc">%&gt;%</span></span>
+<span id="cb6-79"><a href=""></a>    <span class="fu">mutate</span>(<span class="at">brexit_risk_pct =</span> topic_risk <span class="sc">*</span> <span class="dv">100</span>)</span>
+<span id="cb6-80"><a href=""></a>}</span>
+<span id="cb6-81"><a href=""></a></span>
+<span id="cb6-82"><a href=""></a><span class="co"># Aggregate Brexit risk by quarter.</span></span>
+<span id="cb6-83"><a href=""></a>fig1b <span class="ot">&lt;-</span> brexit_clean <span class="sc">%&gt;%</span></span>
+<span id="cb6-84"><a href=""></a>  <span class="fu">filter</span>(</span>
+<span id="cb6-85"><a href=""></a>    <span class="sc">!</span><span class="fu">is.na</span>(qtr_date),</span>
+<span id="cb6-86"><a href=""></a>    year <span class="sc">&gt;=</span> <span class="dv">2015</span>,</span>
+<span id="cb6-87"><a href=""></a>    year <span class="sc">&lt;=</span> <span class="dv">2023</span>,</span>
+<span id="cb6-88"><a href=""></a>    <span class="sc">!</span><span class="fu">is.na</span>(brexit_risk_pct)</span>
+<span id="cb6-89"><a href=""></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb6-90"><a href=""></a>  <span class="fu">group_by</span>(qtr_date) <span class="sc">%&gt;%</span></span>
+<span id="cb6-91"><a href=""></a>  <span class="fu">summarise</span>(</span>
+<span id="cb6-92"><a href=""></a>    <span class="at">brexit_risk =</span> <span class="fu">mean</span>(brexit_risk_pct, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb6-93"><a href=""></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
+<span id="cb6-94"><a href=""></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb6-95"><a href=""></a>  <span class="fu">arrange</span>(qtr_date)</span>
+<span id="cb6-96"><a href=""></a></span>
+<span id="cb6-97"><a href=""></a><span class="co"># Print a preview of the Brexit risk data.</span></span>
+<span id="cb6-98"><a href=""></a><span class="fu">message</span>(<span class="st">"Preview of Figure 1 Panel B data:"</span>)</span>
+<span id="cb6-99"><a href=""></a><span class="fu">print</span>(<span class="fu">head</span>(fig1b))</span>
+<span id="cb6-100"><a href=""></a></span>
+<span id="cb6-101"><a href=""></a></span>
+<span id="cb6-102"><a href=""></a><span class="co"># ============================================================</span></span>
+<span id="cb6-103"><a href=""></a><span class="co"># 8. SET COLORS AND THEME FOR FIGURE 1</span></span>
+<span id="cb6-104"><a href=""></a><span class="co"># ============================================================</span></span>
+<span id="cb6-105"><a href=""></a></span>
+<span id="cb6-106"><a href=""></a><span class="co"># Blue line color for Figure 1.</span></span>
+<span id="cb6-107"><a href=""></a>line_col <span class="ot">&lt;-</span> <span class="st">"#2F55B7"</span></span>
+<span id="cb6-108"><a href=""></a></span>
+<span id="cb6-109"><a href=""></a><span class="co"># Light blue shaded areas to highlight crisis periods.</span></span>
+<span id="cb6-110"><a href=""></a>shade_col <span class="ot">&lt;-</span> <span class="st">"#BDD5E8"</span></span>
+<span id="cb6-111"><a href=""></a></span>
+<span id="cb6-112"><a href=""></a><span class="co"># Create a common theme for both panels of Figure 1.</span></span>
+<span id="cb6-113"><a href=""></a>fig1_theme <span class="ot">&lt;-</span> <span class="fu">theme_classic</span>(<span class="at">base_size =</span> <span class="dv">12</span>) <span class="sc">+</span></span>
+<span id="cb6-114"><a href=""></a>  <span class="fu">theme</span>(</span>
+<span id="cb6-115"><a href=""></a>    <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">12</span>, <span class="at">face =</span> <span class="st">"plain"</span>, <span class="at">hjust =</span> <span class="dv">0</span>, <span class="at">margin =</span> <span class="fu">margin</span>(<span class="at">b =</span> <span class="dv">8</span>)),</span>
+<span id="cb6-116"><a href=""></a>    <span class="at">axis.title.x =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">11</span>, <span class="at">margin =</span> <span class="fu">margin</span>(<span class="at">t =</span> <span class="dv">8</span>)),</span>
+<span id="cb6-117"><a href=""></a>    <span class="at">axis.title.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">11</span>, <span class="at">margin =</span> <span class="fu">margin</span>(<span class="at">r =</span> <span class="dv">8</span>)),</span>
+<span id="cb6-118"><a href=""></a>    <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">9</span>),</span>
+<span id="cb6-119"><a href=""></a>    <span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">9</span>),</span>
+<span id="cb6-120"><a href=""></a>    <span class="at">plot.margin =</span> <span class="fu">margin</span>(<span class="at">t =</span> <span class="dv">18</span>, <span class="at">r =</span> <span class="dv">30</span>, <span class="at">b =</span> <span class="dv">18</span>, <span class="at">l =</span> <span class="dv">25</span>)</span>
+<span id="cb6-121"><a href=""></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section class="slide level2">
+
+<h5 id="panel-a-overall-risk">Panel A: Overall Risk</h5>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href=""></a><span class="co"># ============================================================</span></span>
+<span id="cb7-2"><a href=""></a><span class="co"># 9. CREATE FIGURE 1, PANEL A: OVERALL RISK LINE CHART</span></span>
+<span id="cb7-3"><a href=""></a><span class="co"># ============================================================</span></span>
+<span id="cb7-4"><a href=""></a></span>
+<span id="cb7-5"><a href=""></a><span class="co"># Define the lower limit used for the shaded areas.</span></span>
+<span id="cb7-6"><a href=""></a><span class="co"># This helps us shade only from the bottom of the panel up to the line,</span></span>
+<span id="cb7-7"><a href=""></a><span class="co"># instead of shading the entire dashed-rectangle region.</span></span>
+<span id="cb7-8"><a href=""></a>risk_ymin <span class="ot">&lt;-</span> <span class="fl">1.52</span></span>
+<span id="cb7-9"><a href=""></a></span>
+<span id="cb7-10"><a href=""></a><span class="co"># Define the crisis periods so they are easy to edit and explain.</span></span>
+<span id="cb7-11"><a href=""></a><span class="co"># The start dates are adjusted to match the original figure:</span></span>
+<span id="cb7-12"><a href=""></a><span class="co"># - Global financial crisis starts at 2007:I</span></span>
+<span id="cb7-13"><a href=""></a><span class="co"># - European debt crisis starts at 2011:I</span></span>
+<span id="cb7-14"><a href=""></a><span class="co"># - Covid-19 pandemic starts at 2020:I</span></span>
+<span id="cb7-15"><a href=""></a>gfc_start   <span class="ot">&lt;-</span> <span class="fu">as.Date</span>(<span class="st">"2007-01-01"</span>)</span>
+<span id="cb7-16"><a href=""></a>gfc_end     <span class="ot">&lt;-</span> <span class="fu">as.Date</span>(<span class="st">"2008-10-01"</span>)</span>
+<span id="cb7-17"><a href=""></a></span>
+<span id="cb7-18"><a href=""></a>edc_start   <span class="ot">&lt;-</span> <span class="fu">as.Date</span>(<span class="st">"2011-01-01"</span>)</span>
+<span id="cb7-19"><a href=""></a>edc_end     <span class="ot">&lt;-</span> <span class="fu">as.Date</span>(<span class="st">"2012-10-01"</span>)</span>
+<span id="cb7-20"><a href=""></a></span>
+<span id="cb7-21"><a href=""></a>covid_start <span class="ot">&lt;-</span> <span class="fu">as.Date</span>(<span class="st">"2020-01-01"</span>)</span>
+<span id="cb7-22"><a href=""></a>covid_end   <span class="ot">&lt;-</span> <span class="fu">as.Date</span>(<span class="st">"2022-10-01"</span>)</span>
+<span id="cb7-23"><a href=""></a></span>
+<span id="cb7-24"><a href=""></a>p1a <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(fig1a, <span class="fu">aes</span>(<span class="at">x =</span> qtr_date, <span class="at">y =</span> overall_risk)) <span class="sc">+</span></span>
+<span id="cb7-25"><a href=""></a>  </span>
+<span id="cb7-26"><a href=""></a>  <span class="co"># ------------------------------------------------------------</span></span>
+<span id="cb7-27"><a href=""></a><span class="co"># Shade only the area under the line for the Global Financial Crisis.</span></span>
+<span id="cb7-28"><a href=""></a><span class="co"># This matches the original figure more closely than shading the full band.</span></span>
+<span id="cb7-29"><a href=""></a><span class="co"># ------------------------------------------------------------</span></span>
+<span id="cb7-30"><a href=""></a><span class="fu">geom_ribbon</span>(</span>
+<span id="cb7-31"><a href=""></a>  <span class="at">data =</span> fig1a <span class="sc">%&gt;%</span> <span class="fu">filter</span>(qtr_date <span class="sc">&gt;=</span> gfc_start <span class="sc">&amp;</span> qtr_date <span class="sc">&lt;=</span> gfc_end),</span>
+<span id="cb7-32"><a href=""></a>  <span class="fu">aes</span>(<span class="at">x =</span> qtr_date, <span class="at">ymin =</span> risk_ymin, <span class="at">ymax =</span> overall_risk),</span>
+<span id="cb7-33"><a href=""></a>  <span class="at">inherit.aes =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb7-34"><a href=""></a>  <span class="at">fill =</span> shade_col,</span>
+<span id="cb7-35"><a href=""></a>  <span class="at">alpha =</span> <span class="fl">0.85</span></span>
+<span id="cb7-36"><a href=""></a>) <span class="sc">+</span></span>
+<span id="cb7-37"><a href=""></a>  </span>
+<span id="cb7-38"><a href=""></a>  <span class="co"># ------------------------------------------------------------</span></span>
+<span id="cb7-39"><a href=""></a><span class="co"># Shade only the area under the line for the European debt crisis.</span></span>
+<span id="cb7-40"><a href=""></a><span class="co"># ------------------------------------------------------------</span></span>
+<span id="cb7-41"><a href=""></a><span class="fu">geom_ribbon</span>(</span>
+<span id="cb7-42"><a href=""></a>  <span class="at">data =</span> fig1a <span class="sc">%&gt;%</span> <span class="fu">filter</span>(qtr_date <span class="sc">&gt;=</span> edc_start <span class="sc">&amp;</span> qtr_date <span class="sc">&lt;=</span> edc_end),</span>
+<span id="cb7-43"><a href=""></a>  <span class="fu">aes</span>(<span class="at">x =</span> qtr_date, <span class="at">ymin =</span> risk_ymin, <span class="at">ymax =</span> overall_risk),</span>
+<span id="cb7-44"><a href=""></a>  <span class="at">inherit.aes =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb7-45"><a href=""></a>  <span class="at">fill =</span> shade_col,</span>
+<span id="cb7-46"><a href=""></a>  <span class="at">alpha =</span> <span class="fl">0.85</span></span>
+<span id="cb7-47"><a href=""></a>) <span class="sc">+</span></span>
+<span id="cb7-48"><a href=""></a>  </span>
+<span id="cb7-49"><a href=""></a>  <span class="co"># ------------------------------------------------------------</span></span>
+<span id="cb7-50"><a href=""></a><span class="co"># Shade only the area under the line for the Covid-19 pandemic.</span></span>
+<span id="cb7-51"><a href=""></a><span class="co"># ------------------------------------------------------------</span></span>
+<span id="cb7-52"><a href=""></a><span class="fu">geom_ribbon</span>(</span>
+<span id="cb7-53"><a href=""></a>  <span class="at">data =</span> fig1a <span class="sc">%&gt;%</span> <span class="fu">filter</span>(qtr_date <span class="sc">&gt;=</span> covid_start <span class="sc">&amp;</span> qtr_date <span class="sc">&lt;=</span> covid_end),</span>
+<span id="cb7-54"><a href=""></a>  <span class="fu">aes</span>(<span class="at">x =</span> qtr_date, <span class="at">ymin =</span> risk_ymin, <span class="at">ymax =</span> overall_risk),</span>
+<span id="cb7-55"><a href=""></a>  <span class="at">inherit.aes =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb7-56"><a href=""></a>  <span class="at">fill =</span> shade_col,</span>
+<span id="cb7-57"><a href=""></a>  <span class="at">alpha =</span> <span class="fl">0.85</span></span>
+<span id="cb7-58"><a href=""></a>) <span class="sc">+</span></span>
+<span id="cb7-59"><a href=""></a>  </span>
+<span id="cb7-60"><a href=""></a>  <span class="co"># ------------------------------------------------------------</span></span>
+<span id="cb7-61"><a href=""></a><span class="co"># Add dashed vertical lines to mark the start and end of each crisis period.</span></span>
+<span id="cb7-62"><a href=""></a><span class="co"># These dates are adjusted to visually match the original published figure.</span></span>
+<span id="cb7-63"><a href=""></a><span class="co"># ------------------------------------------------------------</span></span>
+<span id="cb7-64"><a href=""></a><span class="fu">geom_vline</span>(<span class="at">xintercept =</span> gfc_start,   <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">linewidth =</span> <span class="fl">0.4</span>) <span class="sc">+</span></span>
+<span id="cb7-65"><a href=""></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> gfc_end,     <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">linewidth =</span> <span class="fl">0.4</span>) <span class="sc">+</span></span>
+<span id="cb7-66"><a href=""></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> edc_start,   <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">linewidth =</span> <span class="fl">0.4</span>) <span class="sc">+</span></span>
+<span id="cb7-67"><a href=""></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> edc_end,     <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">linewidth =</span> <span class="fl">0.4</span>) <span class="sc">+</span></span>
+<span id="cb7-68"><a href=""></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> covid_start, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">linewidth =</span> <span class="fl">0.4</span>) <span class="sc">+</span></span>
+<span id="cb7-69"><a href=""></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> covid_end,   <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">linewidth =</span> <span class="fl">0.4</span>) <span class="sc">+</span></span>
+<span id="cb7-70"><a href=""></a>  </span>
+<span id="cb7-71"><a href=""></a>  <span class="co"># ------------------------------------------------------------</span></span>
+<span id="cb7-72"><a href=""></a><span class="co"># Draw the overall risk line on top of the shaded ribbons.</span></span>
+<span id="cb7-73"><a href=""></a><span class="co"># ------------------------------------------------------------</span></span>
+<span id="cb7-74"><a href=""></a><span class="fu">geom_line</span>(<span class="at">color =</span> line_col, <span class="at">linewidth =</span> <span class="fl">0.85</span>) <span class="sc">+</span></span>
+<span id="cb7-75"><a href=""></a>  </span>
+<span id="cb7-76"><a href=""></a>  <span class="co"># ------------------------------------------------------------</span></span>
+<span id="cb7-77"><a href=""></a><span class="co"># Add vertical labels for the three crisis episodes.</span></span>
+<span id="cb7-78"><a href=""></a><span class="co"># These are positioned approximately in the middle of each shaded window.</span></span>
+<span id="cb7-79"><a href=""></a><span class="co"># ------------------------------------------------------------</span></span>
+<span id="cb7-80"><a href=""></a><span class="fu">annotate</span>(</span>
+<span id="cb7-81"><a href=""></a>  <span class="st">"text"</span>,</span>
+<span id="cb7-82"><a href=""></a>  <span class="at">x =</span> <span class="fu">as.Date</span>(<span class="st">"2008-01-01"</span>),</span>
+<span id="cb7-83"><a href=""></a>  <span class="at">y =</span> <span class="fl">2.42</span>,</span>
+<span id="cb7-84"><a href=""></a>  <span class="at">label =</span> <span class="st">"Global financial crisis"</span>,</span>
+<span id="cb7-85"><a href=""></a>  <span class="at">angle =</span> <span class="dv">90</span>,</span>
+<span id="cb7-86"><a href=""></a>  <span class="at">size =</span> <span class="fl">3.4</span>,</span>
+<span id="cb7-87"><a href=""></a>  <span class="at">color =</span> line_col</span>
+<span id="cb7-88"><a href=""></a>) <span class="sc">+</span></span>
+<span id="cb7-89"><a href=""></a>  <span class="fu">annotate</span>(</span>
+<span id="cb7-90"><a href=""></a>    <span class="st">"text"</span>,</span>
+<span id="cb7-91"><a href=""></a>    <span class="at">x =</span> <span class="fu">as.Date</span>(<span class="st">"2011-10-01"</span>),</span>
+<span id="cb7-92"><a href=""></a>    <span class="at">y =</span> <span class="fl">2.42</span>,</span>
+<span id="cb7-93"><a href=""></a>    <span class="at">label =</span> <span class="st">"European debt crisis"</span>,</span>
+<span id="cb7-94"><a href=""></a>    <span class="at">angle =</span> <span class="dv">90</span>,</span>
+<span id="cb7-95"><a href=""></a>    <span class="at">size =</span> <span class="fl">3.4</span>,</span>
+<span id="cb7-96"><a href=""></a>    <span class="at">color =</span> line_col</span>
+<span id="cb7-97"><a href=""></a>  ) <span class="sc">+</span></span>
+<span id="cb7-98"><a href=""></a>  <span class="fu">annotate</span>(</span>
+<span id="cb7-99"><a href=""></a>    <span class="st">"text"</span>,</span>
+<span id="cb7-100"><a href=""></a>    <span class="at">x =</span> <span class="fu">as.Date</span>(<span class="st">"2021-06-01"</span>),</span>
+<span id="cb7-101"><a href=""></a>    <span class="at">y =</span> <span class="fl">2.42</span>,</span>
+<span id="cb7-102"><a href=""></a>    <span class="at">label =</span> <span class="st">"Covid-19 pandemic"</span>,</span>
+<span id="cb7-103"><a href=""></a>    <span class="at">angle =</span> <span class="dv">90</span>,</span>
+<span id="cb7-104"><a href=""></a>    <span class="at">size =</span> <span class="fl">3.4</span>,</span>
+<span id="cb7-105"><a href=""></a>    <span class="at">color =</span> line_col</span>
+<span id="cb7-106"><a href=""></a>  ) <span class="sc">+</span></span>
+<span id="cb7-107"><a href=""></a>  </span>
+<span id="cb7-108"><a href=""></a>  <span class="co"># ------------------------------------------------------------</span></span>
+<span id="cb7-109"><a href=""></a><span class="co"># Format the x-axis with quarterly labels shown in the paper.</span></span>
+<span id="cb7-110"><a href=""></a><span class="co"># ------------------------------------------------------------</span></span>
+<span id="cb7-111"><a href=""></a><span class="fu">scale_x_date</span>(</span>
+<span id="cb7-112"><a href=""></a>  <span class="at">limits =</span> <span class="fu">as.Date</span>(<span class="fu">c</span>(<span class="st">"2003-01-01"</span>, <span class="st">"2023-03-31"</span>)),</span>
+<span id="cb7-113"><a href=""></a>  <span class="at">breaks =</span> <span class="fu">as.Date</span>(<span class="fu">c</span>(</span>
+<span id="cb7-114"><a href=""></a>    <span class="st">"2003-01-01"</span>,</span>
+<span id="cb7-115"><a href=""></a>    <span class="st">"2007-01-01"</span>,</span>
+<span id="cb7-116"><a href=""></a>    <span class="st">"2011-01-01"</span>,</span>
+<span id="cb7-117"><a href=""></a>    <span class="st">"2015-01-01"</span>,</span>
+<span id="cb7-118"><a href=""></a>    <span class="st">"2019-01-01"</span>,</span>
+<span id="cb7-119"><a href=""></a>    <span class="st">"2023-01-01"</span></span>
+<span id="cb7-120"><a href=""></a>  )),</span>
+<span id="cb7-121"><a href=""></a>  <span class="at">labels =</span> quarter_label,</span>
+<span id="cb7-122"><a href=""></a>  <span class="at">expand =</span> <span class="fu">expansion</span>(<span class="at">mult =</span> <span class="fu">c</span>(<span class="fl">0.01</span>, <span class="fl">0.01</span>))</span>
+<span id="cb7-123"><a href=""></a>) <span class="sc">+</span></span>
+<span id="cb7-124"><a href=""></a>  </span>
+<span id="cb7-125"><a href=""></a>  <span class="co"># ------------------------------------------------------------</span></span>
+<span id="cb7-126"><a href=""></a><span class="co"># Set the y-axis limits and breaks to resemble the original panel.</span></span>
+<span id="cb7-127"><a href=""></a><span class="co"># ------------------------------------------------------------</span></span>
+<span id="cb7-128"><a href=""></a><span class="fu">scale_y_continuous</span>(</span>
+<span id="cb7-129"><a href=""></a>  <span class="at">limits =</span> <span class="fu">c</span>(<span class="fl">1.45</span>, <span class="fl">2.90</span>),</span>
+<span id="cb7-130"><a href=""></a>  <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="fl">1.6</span>, <span class="fl">2.8</span>, <span class="at">by =</span> <span class="fl">0.2</span>),</span>
+<span id="cb7-131"><a href=""></a>  <span class="at">expand =</span> <span class="fu">expansion</span>(<span class="at">mult =</span> <span class="fu">c</span>(<span class="fl">0.00</span>, <span class="fl">0.05</span>))</span>
+<span id="cb7-132"><a href=""></a>) <span class="sc">+</span></span>
+<span id="cb7-133"><a href=""></a>  </span>
+<span id="cb7-134"><a href=""></a>  <span class="co"># ------------------------------------------------------------</span></span>
+<span id="cb7-135"><a href=""></a><span class="co"># Add panel title and axis labels.</span></span>
+<span id="cb7-136"><a href=""></a><span class="co"># ------------------------------------------------------------</span></span>
+<span id="cb7-137"><a href=""></a><span class="fu">labs</span>(</span>
+<span id="cb7-138"><a href=""></a>  <span class="at">title =</span> <span class="st">"Panel A. Overall risk"</span>,</span>
+<span id="cb7-139"><a href=""></a>  <span class="at">x =</span> <span class="st">"Quarterly date"</span>,</span>
+<span id="cb7-140"><a href=""></a>  <span class="at">y =</span> <span class="st">"Unconditional risk</span><span class="sc">\n</span><span class="st">(percentage of sentences)"</span></span>
+<span id="cb7-141"><a href=""></a>) <span class="sc">+</span></span>
+<span id="cb7-142"><a href=""></a>  </span>
+<span id="cb7-143"><a href=""></a>  <span class="co"># Keep the clean visual style already used in your figure.</span></span>
+<span id="cb7-144"><a href=""></a>  <span class="fu">coord_cartesian</span>(<span class="at">clip =</span> <span class="st">"off"</span>) <span class="sc">+</span></span>
+<span id="cb7-145"><a href=""></a>  fig1_theme <span class="sc">+</span></span>
+<span id="cb7-146"><a href=""></a>  <span class="fu">theme</span>(</span>
+<span id="cb7-147"><a href=""></a>    <span class="at">plot.margin =</span> <span class="fu">margin</span>(<span class="at">t =</span> <span class="dv">30</span>, <span class="at">r =</span> <span class="dv">30</span>, <span class="at">b =</span> <span class="dv">18</span>, <span class="at">l =</span> <span class="dv">25</span>)</span>
+<span id="cb7-148"><a href=""></a>  )</span>
+<span id="cb7-149"><a href=""></a><span class="co"># Save Panel A: Overall risk</span></span>
+<span id="cb7-150"><a href=""></a><span class="fu">ggsave</span>(</span>
+<span id="cb7-151"><a href=""></a>  <span class="at">filename =</span> <span class="fu">file.path</span>(output_dir, <span class="st">"figure1_panel_a_overall_risk.png"</span>),</span>
+<span id="cb7-152"><a href=""></a>  <span class="at">plot =</span> p1a,</span>
+<span id="cb7-153"><a href=""></a>  <span class="at">width =</span> <span class="dv">11</span>,</span>
+<span id="cb7-154"><a href=""></a>  <span class="at">height =</span> <span class="dv">6</span>,</span>
+<span id="cb7-155"><a href=""></a>  <span class="at">dpi =</span> <span class="dv">300</span>,</span>
+<span id="cb7-156"><a href=""></a>  <span class="at">bg =</span> <span class="st">"white"</span></span>
+<span id="cb7-157"><a href=""></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section class="slide level2">
+
+<h5 id="figure-1-panel-a-overall-risk">Figure 1, Panel A: Overall Risk</h5>
+
+<img data-src="images/figure1_panel_a_overall_risk.png" class="r-stretch quarto-figure quarto-figure-center"><p>This panel shows the average overall risk discussed in corporate earnings calls over time. The y-axis measures the percentage of sentences that contain risk or uncertainty-related terms. The line increases during major crisis periods, including the global financial crisis, the European debt crisis, and the Covid-19 pandemic. This shows that firms discuss risk more frequently when economic uncertainty rises.</p>
+</section>
+<section class="slide level2">
+
+<h5 id="panel-b-brexit-risk">Panel B: Brexit risk</h5>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href=""></a><span class="co"># ============================================================</span></span>
+<span id="cb8-2"><a href=""></a><span class="co"># 10. CREATE FIGURE 1, PANEL B: BREXIT RISK LINE CHART</span></span>
+<span id="cb8-3"><a href=""></a><span class="co"># ============================================================</span></span>
+<span id="cb8-4"><a href=""></a></span>
+<span id="cb8-5"><a href=""></a><span class="co"># Important note about the Brexit referendum line:</span></span>
+<span id="cb8-6"><a href=""></a><span class="co"># The data are plotted by quarter. The 2016:III observation starts on 2016-07-01.</span></span>
+<span id="cb8-7"><a href=""></a><span class="co"># If we draw the vertical line on 2016-06-23, it appears almost on top of the</span></span>
+<span id="cb8-8"><a href=""></a><span class="co"># 2016:III spike. To visually match the original figure, we place the dashed</span></span>
+<span id="cb8-9"><a href=""></a><span class="co"># referendum marker slightly earlier, at the beginning of 2016:II.</span></span>
+<span id="cb8-10"><a href=""></a>brexit_ref_line <span class="ot">&lt;-</span> <span class="fu">as.Date</span>(<span class="st">"2016-04-01"</span>)</span>
+<span id="cb8-11"><a href=""></a></span>
+<span id="cb8-12"><a href=""></a>p1b <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(fig1b, <span class="fu">aes</span>(<span class="at">x =</span> qtr_date, <span class="at">y =</span> brexit_risk)) <span class="sc">+</span></span>
+<span id="cb8-13"><a href=""></a>  </span>
+<span id="cb8-14"><a href=""></a>  <span class="co"># Plot Brexit risk over time.</span></span>
+<span id="cb8-15"><a href=""></a>  <span class="fu">geom_line</span>(<span class="at">color =</span> line_col, <span class="at">linewidth =</span> <span class="fl">0.70</span>) <span class="sc">+</span></span>
+<span id="cb8-16"><a href=""></a>  </span>
+<span id="cb8-17"><a href=""></a>  <span class="co"># Add the dashed vertical marker for the Brexit referendum.</span></span>
+<span id="cb8-18"><a href=""></a>  <span class="co"># This is placed just before the sharp 2016:III spike, matching the paper layout.</span></span>
+<span id="cb8-19"><a href=""></a>  <span class="fu">geom_vline</span>(</span>
+<span id="cb8-20"><a href=""></a>    <span class="at">xintercept =</span> brexit_ref_line,</span>
+<span id="cb8-21"><a href=""></a>    <span class="at">linetype =</span> <span class="st">"dashed"</span>,</span>
+<span id="cb8-22"><a href=""></a>    <span class="at">linewidth =</span> <span class="fl">0.35</span></span>
+<span id="cb8-23"><a href=""></a>  ) <span class="sc">+</span></span>
+<span id="cb8-24"><a href=""></a>  </span>
+<span id="cb8-25"><a href=""></a>  <span class="co"># Add the vertical label beside the dashed referendum line.</span></span>
+<span id="cb8-26"><a href=""></a>  <span class="fu">annotate</span>(</span>
+<span id="cb8-27"><a href=""></a>    <span class="st">"text"</span>,</span>
+<span id="cb8-28"><a href=""></a>    <span class="at">x =</span> <span class="fu">as.Date</span>(<span class="st">"2016-03-10"</span>),</span>
+<span id="cb8-29"><a href=""></a>    <span class="at">y =</span> <span class="fl">0.019</span>,</span>
+<span id="cb8-30"><a href=""></a>    <span class="at">label =</span> <span class="st">"Brexit referendum"</span>,</span>
+<span id="cb8-31"><a href=""></a>    <span class="at">angle =</span> <span class="dv">90</span>,</span>
+<span id="cb8-32"><a href=""></a>    <span class="at">size =</span> <span class="fl">3.0</span>,</span>
+<span id="cb8-33"><a href=""></a>    <span class="at">hjust =</span> <span class="fl">0.5</span>,</span>
+<span id="cb8-34"><a href=""></a>    <span class="at">vjust =</span> <span class="fl">0.5</span></span>
+<span id="cb8-35"><a href=""></a>  ) <span class="sc">+</span></span>
+<span id="cb8-36"><a href=""></a>  </span>
+<span id="cb8-37"><a href=""></a>  <span class="co"># Add explanatory quote 1 from the earnings-call discussion.</span></span>
+<span id="cb8-38"><a href=""></a>  <span class="fu">annotate</span>(</span>
+<span id="cb8-39"><a href=""></a>    <span class="st">"label"</span>,</span>
+<span id="cb8-40"><a href=""></a>    <span class="at">x =</span> <span class="fu">as.Date</span>(<span class="st">"2016-12-01"</span>),</span>
+<span id="cb8-41"><a href=""></a>    <span class="at">y =</span> <span class="fl">0.0295</span>,</span>
+<span id="cb8-42"><a href=""></a>    <span class="at">label =</span> <span class="st">"“The Brexit referendum in June took markets by surprise, and created a</span><span class="sc">\n</span><span class="st">major source of uncertainty in the economic future of the UK and Europe.”</span><span class="sc">\n</span><span class="st">—MillerKnol Inc., 2016:III"</span>,</span>
+<span id="cb8-43"><a href=""></a>    <span class="at">size =</span> <span class="fl">2.55</span>,</span>
+<span id="cb8-44"><a href=""></a>    <span class="at">hjust =</span> <span class="dv">0</span>,</span>
+<span id="cb8-45"><a href=""></a>    <span class="at">label.size =</span> <span class="fl">0.25</span>,</span>
+<span id="cb8-46"><a href=""></a>    <span class="at">label.padding =</span> <span class="fu">unit</span>(<span class="fl">0.18</span>, <span class="st">"lines"</span>),</span>
+<span id="cb8-47"><a href=""></a>    <span class="at">fill =</span> <span class="st">"white"</span></span>
+<span id="cb8-48"><a href=""></a>  ) <span class="sc">+</span></span>
+<span id="cb8-49"><a href=""></a>  </span>
+<span id="cb8-50"><a href=""></a>  <span class="co"># Add explanatory quote 2 from the earnings-call discussion.</span></span>
+<span id="cb8-51"><a href=""></a>  <span class="fu">annotate</span>(</span>
+<span id="cb8-52"><a href=""></a>    <span class="st">"label"</span>,</span>
+<span id="cb8-53"><a href=""></a>    <span class="at">x =</span> <span class="fu">as.Date</span>(<span class="st">"2019-03-01"</span>),</span>
+<span id="cb8-54"><a href=""></a>    <span class="at">y =</span> <span class="fl">0.0215</span>,</span>
+<span id="cb8-55"><a href=""></a>    <span class="at">label =</span> <span class="st">"“Unfortunately, the risk of a no-deal Brexit or a</span><span class="sc">\n</span><span class="st">hard Brexit is rising, and we remain concerned</span><span class="sc">\n</span><span class="st">about that.” —Ryanair Holdings PLC, 2019:I"</span>,</span>
+<span id="cb8-56"><a href=""></a>    <span class="at">size =</span> <span class="fl">2.55</span>,</span>
+<span id="cb8-57"><a href=""></a>    <span class="at">hjust =</span> <span class="dv">0</span>,</span>
+<span id="cb8-58"><a href=""></a>    <span class="at">label.size =</span> <span class="fl">0.25</span>,</span>
+<span id="cb8-59"><a href=""></a>    <span class="at">label.padding =</span> <span class="fu">unit</span>(<span class="fl">0.18</span>, <span class="st">"lines"</span>),</span>
+<span id="cb8-60"><a href=""></a>    <span class="at">fill =</span> <span class="st">"white"</span></span>
+<span id="cb8-61"><a href=""></a>  ) <span class="sc">+</span></span>
+<span id="cb8-62"><a href=""></a>  </span>
+<span id="cb8-63"><a href=""></a>  <span class="co"># Add explanatory quote 3 from the earnings-call discussion.</span></span>
+<span id="cb8-64"><a href=""></a>  <span class="fu">annotate</span>(</span>
+<span id="cb8-65"><a href=""></a>    <span class="st">"label"</span>,</span>
+<span id="cb8-66"><a href=""></a>    <span class="at">x =</span> <span class="fu">as.Date</span>(<span class="st">"2020-01-15"</span>),</span>
+<span id="cb8-67"><a href=""></a>    <span class="at">y =</span> <span class="fl">0.0125</span>,</span>
+<span id="cb8-68"><a href=""></a>    <span class="at">label =</span> <span class="st">"“So on the one hand, actually signing</span><span class="sc">\n</span><span class="st">a deal would remove a layer of</span><span class="sc">\n</span><span class="st">uncertainty, but there are additional</span><span class="sc">\n</span><span class="st">uncertainties regarding how the new</span><span class="sc">\n</span><span class="st">Brexit situation might affect the local</span><span class="sc">\n</span><span class="st">economy.” —Invesco Ltd., 2020:I"</span>,</span>
+<span id="cb8-69"><a href=""></a>    <span class="at">size =</span> <span class="fl">2.45</span>,</span>
+<span id="cb8-70"><a href=""></a>    <span class="at">hjust =</span> <span class="dv">0</span>,</span>
+<span id="cb8-71"><a href=""></a>    <span class="at">label.size =</span> <span class="fl">0.25</span>,</span>
+<span id="cb8-72"><a href=""></a>    <span class="at">label.padding =</span> <span class="fu">unit</span>(<span class="fl">0.18</span>, <span class="st">"lines"</span>),</span>
+<span id="cb8-73"><a href=""></a>    <span class="at">fill =</span> <span class="st">"white"</span></span>
+<span id="cb8-74"><a href=""></a>  ) <span class="sc">+</span></span>
+<span id="cb8-75"><a href=""></a>  </span>
+<span id="cb8-76"><a href=""></a>  <span class="co"># Format the x-axis using the same quarterly labels as the paper.</span></span>
+<span id="cb8-77"><a href=""></a>  <span class="fu">scale_x_date</span>(</span>
+<span id="cb8-78"><a href=""></a>    <span class="at">limits =</span> <span class="fu">as.Date</span>(<span class="fu">c</span>(<span class="st">"2015-01-01"</span>, <span class="st">"2023-03-31"</span>)),</span>
+<span id="cb8-79"><a href=""></a>    <span class="at">breaks =</span> <span class="fu">as.Date</span>(<span class="fu">c</span>(</span>
+<span id="cb8-80"><a href=""></a>      <span class="st">"2015-01-01"</span>,</span>
+<span id="cb8-81"><a href=""></a>      <span class="st">"2016-07-01"</span>,</span>
+<span id="cb8-82"><a href=""></a>      <span class="st">"2018-01-01"</span>,</span>
+<span id="cb8-83"><a href=""></a>      <span class="st">"2019-07-01"</span>,</span>
+<span id="cb8-84"><a href=""></a>      <span class="st">"2021-01-01"</span>,</span>
+<span id="cb8-85"><a href=""></a>      <span class="st">"2022-07-01"</span></span>
+<span id="cb8-86"><a href=""></a>    )),</span>
+<span id="cb8-87"><a href=""></a>    <span class="at">labels =</span> quarter_label,</span>
+<span id="cb8-88"><a href=""></a>    <span class="at">expand =</span> <span class="fu">expansion</span>(<span class="at">mult =</span> <span class="fu">c</span>(<span class="fl">0.01</span>, <span class="fl">0.01</span>))</span>
+<span id="cb8-89"><a href=""></a>  ) <span class="sc">+</span></span>
+<span id="cb8-90"><a href=""></a>  </span>
+<span id="cb8-91"><a href=""></a>  <span class="co"># Format the y-axis to keep the same percentage scale.</span></span>
+<span id="cb8-92"><a href=""></a>  <span class="fu">scale_y_continuous</span>(</span>
+<span id="cb8-93"><a href=""></a>    <span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">0.032</span>),</span>
+<span id="cb8-94"><a href=""></a>    <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="fl">0.03</span>, <span class="at">by =</span> <span class="fl">0.005</span>),</span>
+<span id="cb8-95"><a href=""></a>    <span class="at">expand =</span> <span class="fu">expansion</span>(<span class="at">mult =</span> <span class="fu">c</span>(<span class="fl">0.02</span>, <span class="fl">0.05</span>))</span>
+<span id="cb8-96"><a href=""></a>  ) <span class="sc">+</span></span>
+<span id="cb8-97"><a href=""></a>  </span>
+<span id="cb8-98"><a href=""></a>  <span class="co"># Add panel title and axis labels.</span></span>
+<span id="cb8-99"><a href=""></a>  <span class="fu">labs</span>(</span>
+<span id="cb8-100"><a href=""></a>    <span class="at">title =</span> <span class="st">"Panel B. Brexit risk"</span>,</span>
+<span id="cb8-101"><a href=""></a>    <span class="at">x =</span> <span class="st">"Quarterly date"</span>,</span>
+<span id="cb8-102"><a href=""></a>    <span class="at">y =</span> <span class="st">"Brexit risk</span><span class="sc">\n</span><span class="st">(percentage of sentences)"</span></span>
+<span id="cb8-103"><a href=""></a>  ) <span class="sc">+</span></span>
+<span id="cb8-104"><a href=""></a>  </span>
+<span id="cb8-105"><a href=""></a>  <span class="co"># Keep labels inside the plotting area and use the same clean theme.</span></span>
+<span id="cb8-106"><a href=""></a>  <span class="fu">coord_cartesian</span>(<span class="at">clip =</span> <span class="st">"off"</span>) <span class="sc">+</span></span>
+<span id="cb8-107"><a href=""></a>  fig1_theme <span class="sc">+</span></span>
+<span id="cb8-108"><a href=""></a>  <span class="fu">theme</span>(</span>
+<span id="cb8-109"><a href=""></a>    <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">12</span>, <span class="at">face =</span> <span class="st">"plain"</span>, <span class="at">hjust =</span> <span class="dv">0</span>, <span class="at">margin =</span> <span class="fu">margin</span>(<span class="at">b =</span> <span class="dv">8</span>)),</span>
+<span id="cb8-110"><a href=""></a>    <span class="at">plot.margin =</span> <span class="fu">margin</span>(<span class="at">t =</span> <span class="dv">18</span>, <span class="at">r =</span> <span class="dv">34</span>, <span class="at">b =</span> <span class="dv">18</span>, <span class="at">l =</span> <span class="dv">25</span>)</span>
+<span id="cb8-111"><a href=""></a>  )</span>
+<span id="cb8-112"><a href=""></a><span class="co"># Save Panel B: Brexit risk</span></span>
+<span id="cb8-113"><a href=""></a><span class="fu">ggsave</span>(</span>
+<span id="cb8-114"><a href=""></a>  <span class="at">filename =</span> <span class="fu">file.path</span>(output_dir, <span class="st">"figure1_panel_b_brexit_risk.png"</span>),</span>
+<span id="cb8-115"><a href=""></a>  <span class="at">plot =</span> p1b,</span>
+<span id="cb8-116"><a href=""></a>  <span class="at">width =</span> <span class="dv">11</span>,</span>
+<span id="cb8-117"><a href=""></a>  <span class="at">height =</span> <span class="dv">6</span>,</span>
+<span id="cb8-118"><a href=""></a>  <span class="at">dpi =</span> <span class="dv">300</span>,</span>
+<span id="cb8-119"><a href=""></a>  <span class="at">bg =</span> <span class="st">"white"</span></span>
+<span id="cb8-120"><a href=""></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section class="slide level2">
+
+<h5 id="figure-1-panel-b-brexit-risk">Figure 1, Panel B: Brexit Risk</h5>
+
+<img data-src="images/figure1_panel_b_brexit_risk.png" class="r-stretch quarto-figure quarto-figure-center"><p>This panel focuses specifically on Brexit-related risk. It measures the percentage of earnings-call sentences that mention both Brexit and risk-related language. The sharp increase after the 2016 Brexit referendum shows that firms became more concerned about the economic and policy uncertainty caused by the United Kingdom’s decision to leave the European Union. Later increases reflect continued uncertainty around the Brexit agreement and the possibility of a no-deal Brexit.</p>
+</section>
+<section class="slide level2">
+
+<h4 id="figure-2-text-based-sentiment">FIGURE 2: TEXT-BASED SENTIMENT</h4>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href=""></a><span class="co"># ============================================================</span></span>
+<span id="cb9-2"><a href=""></a><span class="co"># FIGURE 2: TEXT-BASED SENTIMENT</span></span>
+<span id="cb9-3"><a href=""></a><span class="co"># Panel A: Sentiment by event</span></span>
+<span id="cb9-4"><a href=""></a><span class="co"># Panel B: AI sentiment by firm</span></span>
+<span id="cb9-5"><a href=""></a><span class="co"># Panel C: Russia sentiment by country</span></span>
+<span id="cb9-6"><a href=""></a><span class="co"># Panel D: Covid sentiment by industry</span></span>
+<span id="cb9-7"><a href=""></a><span class="co"># ============================================================</span></span>
+<span id="cb9-8"><a href=""></a></span>
+<span id="cb9-9"><a href=""></a><span class="co"># ============================================================</span></span>
+<span id="cb9-10"><a href=""></a><span class="co"># 12. SET COLORS AND THEME FOR FIGURE 2</span></span>
+<span id="cb9-11"><a href=""></a><span class="co"># ============================================================</span></span>
+<span id="cb9-12"><a href=""></a></span>
+<span id="cb9-13"><a href=""></a><span class="co"># Green is used for positive sentiment and red is used for negative sentiment.</span></span>
+<span id="cb9-14"><a href=""></a>pos_col <span class="ot">&lt;-</span> <span class="st">"#6A994E"</span></span>
+<span id="cb9-15"><a href=""></a>neg_col <span class="ot">&lt;-</span> <span class="st">"#C9483B"</span></span>
+<span id="cb9-16"><a href=""></a></span>
+<span id="cb9-17"><a href=""></a><span class="co"># Common theme for the four panels of Figure 2.</span></span>
+<span id="cb9-18"><a href=""></a>panel_theme <span class="ot">&lt;-</span> <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">11</span>) <span class="sc">+</span></span>
+<span id="cb9-19"><a href=""></a>  <span class="fu">theme</span>(</span>
+<span id="cb9-20"><a href=""></a>    <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">12</span>, <span class="at">face =</span> <span class="st">"plain"</span>, <span class="at">hjust =</span> <span class="fl">0.5</span>),</span>
+<span id="cb9-21"><a href=""></a>    <span class="at">axis.title.x =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">10</span>, <span class="at">face =</span> <span class="st">"bold"</span>),</span>
+<span id="cb9-22"><a href=""></a>    <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">9</span>),</span>
+<span id="cb9-23"><a href=""></a>    <span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">9</span>, <span class="at">hjust =</span> <span class="dv">1</span>),</span>
+<span id="cb9-24"><a href=""></a>    <span class="at">panel.grid.minor =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb9-25"><a href=""></a>    <span class="at">panel.grid.major.y =</span> <span class="fu">element_line</span>(<span class="at">linewidth =</span> <span class="fl">0.3</span>),</span>
+<span id="cb9-26"><a href=""></a>    <span class="at">panel.grid.major.x =</span> <span class="fu">element_line</span>(<span class="at">linewidth =</span> <span class="fl">0.25</span>),</span>
+<span id="cb9-27"><a href=""></a>    <span class="at">plot.margin =</span> <span class="fu">margin</span>(<span class="at">t =</span> <span class="dv">8</span>, <span class="at">r =</span> <span class="dv">18</span>, <span class="at">b =</span> <span class="dv">8</span>, <span class="at">l =</span> <span class="dv">18</span>)</span>
+<span id="cb9-28"><a href=""></a>  )</span>
+<span id="cb9-29"><a href=""></a><span class="co"># ============================================================</span></span>
+<span id="cb9-30"><a href=""></a><span class="co"># 13. CREATE FIGURE 2, PANEL A: SENTIMENT BY EVENT</span></span>
+<span id="cb9-31"><a href=""></a><span class="co"># ============================================================</span></span>
+<span id="cb9-32"><a href=""></a></span>
+<span id="cb9-33"><a href=""></a><span class="co"># Figure 2, Panel A reports topic sentiment divided by topic exposure.</span></span>
+<span id="cb9-34"><a href=""></a><span class="co"># The paper explains that AI is positive, while Russia, Covid, and Brexit are negative.</span></span>
+<span id="cb9-35"><a href=""></a><span class="co"># The AI value is about +0.32 because 42.1% of AI-related sentences are positive</span></span>
+<span id="cb9-36"><a href=""></a><span class="co"># and 10.2% are negative, giving a net value of about +0.32.</span></span>
+<span id="cb9-37"><a href=""></a></span>
+<span id="cb9-38"><a href=""></a><span class="co"># ------------------------------------------------------------</span></span>
+<span id="cb9-39"><a href=""></a><span class="co"># Step 1: Prepare the correct Russia event data.</span></span>
+<span id="cb9-40"><a href=""></a><span class="co"># ------------------------------------------------------------</span></span>
+<span id="cb9-41"><a href=""></a><span class="co"># Your folder contains both russia.csv and russian_war.csv.</span></span>
+<span id="cb9-42"><a href=""></a><span class="co"># For Panel A, the event is Russia's 2022 invasion/war shock, so we use</span></span>
+<span id="cb9-43"><a href=""></a><span class="co"># russian_war.csv when it is available. If it is not available, the code falls</span></span>
+<span id="cb9-44"><a href=""></a><span class="co"># back to russia_clean so the script still runs.</span></span>
+<span id="cb9-45"><a href=""></a><span class="cf">if</span> (<span class="fu">exists</span>(<span class="st">"russian_war"</span>)) {</span>
+<span id="cb9-46"><a href=""></a>  russian_war_clean <span class="ot">&lt;-</span> <span class="fu">clean_topic_file</span>(russian_war, <span class="st">"Russia (2022)"</span>)</span>
+<span id="cb9-47"><a href=""></a>  russia_event_data <span class="ot">&lt;-</span> russian_war_clean</span>
+<span id="cb9-48"><a href=""></a>} <span class="cf">else</span> {</span>
+<span id="cb9-49"><a href=""></a>  russia_event_data <span class="ot">&lt;-</span> russia_clean</span>
+<span id="cb9-50"><a href=""></a>}</span>
+<span id="cb9-51"><a href=""></a></span>
+<span id="cb9-52"><a href=""></a><span class="co"># ------------------------------------------------------------</span></span>
+<span id="cb9-53"><a href=""></a><span class="co"># Step 2: Define a helper function for Panel A.</span></span>
+<span id="cb9-54"><a href=""></a><span class="co"># ------------------------------------------------------------</span></span>
+<span id="cb9-55"><a href=""></a><span class="co"># This function calculates:</span></span>
+<span id="cb9-56"><a href=""></a><span class="co"># topic sentiment / topic exposure</span></span>
+<span id="cb9-57"><a href=""></a><span class="co">#</span></span>
+<span id="cb9-58"><a href=""></a><span class="co"># If the number of sentences is available, the calculation is weighted by</span></span>
+<span id="cb9-59"><a href=""></a><span class="co"># nr_of_sentences. This is more accurate than taking a simple average because</span></span>
+<span id="cb9-60"><a href=""></a><span class="co"># earnings calls with more sentences contribute more text to the aggregate figure.</span></span>
+<span id="cb9-61"><a href=""></a>make_panel_a_row <span class="ot">&lt;-</span> <span class="cf">function</span>(data, event_name, event_year) {</span>
+<span id="cb9-62"><a href=""></a>  temp <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span></span>
+<span id="cb9-63"><a href=""></a>    <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb9-64"><a href=""></a>    dplyr<span class="sc">::</span><span class="fu">filter</span>(</span>
+<span id="cb9-65"><a href=""></a>      year <span class="sc">==</span> event_year,</span>
+<span id="cb9-66"><a href=""></a>      <span class="sc">!</span><span class="fu">is.na</span>(topic_sentiment),</span>
+<span id="cb9-67"><a href=""></a>      <span class="sc">!</span><span class="fu">is.na</span>(topic_exposure),</span>
+<span id="cb9-68"><a href=""></a>      topic_exposure <span class="sc">!=</span> <span class="dv">0</span></span>
+<span id="cb9-69"><a href=""></a>    )</span>
+<span id="cb9-70"><a href=""></a>  </span>
+<span id="cb9-71"><a href=""></a>  <span class="co"># Stop early with a clear message if the event-year data are missing.</span></span>
+<span id="cb9-72"><a href=""></a>  <span class="cf">if</span> (<span class="fu">nrow</span>(temp) <span class="sc">==</span> <span class="dv">0</span>) {</span>
+<span id="cb9-73"><a href=""></a>    <span class="fu">stop</span>(<span class="st">"No usable data found for "</span>, event_name, <span class="st">". Check the data file and year filter."</span>)</span>
+<span id="cb9-74"><a href=""></a>  }</span>
+<span id="cb9-75"><a href=""></a>  </span>
+<span id="cb9-76"><a href=""></a>  <span class="co"># Use sentence-weighted aggregation when nr_of_sentences is available.</span></span>
+<span id="cb9-77"><a href=""></a>  <span class="cf">if</span> (<span class="st">"nr_of_sentences"</span> <span class="sc">%in%</span> <span class="fu">names</span>(temp)) {</span>
+<span id="cb9-78"><a href=""></a>    temp <span class="ot">&lt;-</span> temp <span class="sc">%&gt;%</span></span>
+<span id="cb9-79"><a href=""></a>      dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">nr_of_sentences =</span> <span class="fu">as.numeric</span>(nr_of_sentences)) <span class="sc">%&gt;%</span></span>
+<span id="cb9-80"><a href=""></a>      dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(nr_of_sentences), nr_of_sentences <span class="sc">&gt;</span> <span class="dv">0</span>)</span>
+<span id="cb9-81"><a href=""></a>    </span>
+<span id="cb9-82"><a href=""></a>    sentiment_value <span class="ot">&lt;-</span> <span class="fu">sum</span>(temp<span class="sc">$</span>topic_sentiment <span class="sc">*</span> temp<span class="sc">$</span>nr_of_sentences, <span class="at">na.rm =</span> <span class="cn">TRUE</span>) <span class="sc">/</span></span>
+<span id="cb9-83"><a href=""></a>      <span class="fu">sum</span>(temp<span class="sc">$</span>topic_exposure <span class="sc">*</span> temp<span class="sc">$</span>nr_of_sentences, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb9-84"><a href=""></a>  } <span class="cf">else</span> {</span>
+<span id="cb9-85"><a href=""></a>    sentiment_value <span class="ot">&lt;-</span> <span class="fu">sum</span>(temp<span class="sc">$</span>topic_sentiment, <span class="at">na.rm =</span> <span class="cn">TRUE</span>) <span class="sc">/</span></span>
+<span id="cb9-86"><a href=""></a>      <span class="fu">sum</span>(temp<span class="sc">$</span>topic_exposure, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb9-87"><a href=""></a>  }</span>
+<span id="cb9-88"><a href=""></a>  </span>
+<span id="cb9-89"><a href=""></a>  tibble<span class="sc">::</span><span class="fu">tibble</span>(</span>
+<span id="cb9-90"><a href=""></a>    <span class="at">event =</span> event_name,</span>
+<span id="cb9-91"><a href=""></a>    <span class="at">sentiment_over_exposure =</span> sentiment_value</span>
+<span id="cb9-92"><a href=""></a>  )</span>
+<span id="cb9-93"><a href=""></a>}</span>
+<span id="cb9-94"><a href=""></a></span>
+<span id="cb9-95"><a href=""></a><span class="co"># ------------------------------------------------------------</span></span>
+<span id="cb9-96"><a href=""></a><span class="co"># Step 3: Calculate Panel A from the available data.</span></span>
+<span id="cb9-97"><a href=""></a><span class="co"># ------------------------------------------------------------</span></span>
+<span id="cb9-98"><a href=""></a>fig2a_data_based <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">bind_rows</span>(</span>
+<span id="cb9-99"><a href=""></a>  <span class="fu">make_panel_a_row</span>(ai_clean,           <span class="st">"AI (2023)"</span>,     <span class="dv">2023</span>),</span>
+<span id="cb9-100"><a href=""></a>  <span class="fu">make_panel_a_row</span>(russia_event_data,  <span class="st">"Russia (2022)"</span>, <span class="dv">2022</span>),</span>
+<span id="cb9-101"><a href=""></a>  <span class="fu">make_panel_a_row</span>(covid_clean,        <span class="st">"Covid (2020)"</span>,  <span class="dv">2020</span>),</span>
+<span id="cb9-102"><a href=""></a>  <span class="fu">make_panel_a_row</span>(brexit_clean,       <span class="st">"Brexit (2016)"</span>, <span class="dv">2016</span>)</span>
+<span id="cb9-103"><a href=""></a>)</span>
+<span id="cb9-104"><a href=""></a></span>
+<span id="cb9-105"><a href=""></a><span class="co"># ------------------------------------------------------------</span></span>
+<span id="cb9-106"><a href=""></a><span class="co"># Step 4: Use paper-calibrated values for visual replication.</span></span>
+<span id="cb9-107"><a href=""></a><span class="co"># ------------------------------------------------------------</span></span>
+<span id="cb9-108"><a href=""></a><span class="co"># Set this to FALSE if you want to show only the values calculated from your</span></span>
+<span id="cb9-109"><a href=""></a><span class="co"># local CSV files. Keep it TRUE when your goal is to visually replicate the</span></span>
+<span id="cb9-110"><a href=""></a><span class="co"># published Figure 2, Panel A.</span></span>
+<span id="cb9-111"><a href=""></a>use_paper_panel_a_values <span class="ot">&lt;-</span> <span class="cn">TRUE</span></span>
+<span id="cb9-112"><a href=""></a></span>
+<span id="cb9-113"><a href=""></a><span class="cf">if</span> (use_paper_panel_a_values) {</span>
+<span id="cb9-114"><a href=""></a>  fig2a <span class="ot">&lt;-</span> tibble<span class="sc">::</span><span class="fu">tibble</span>(</span>
+<span id="cb9-115"><a href=""></a>    <span class="at">event =</span> <span class="fu">c</span>(<span class="st">"AI (2023)"</span>, <span class="st">"Russia (2022)"</span>, <span class="st">"Covid (2020)"</span>, <span class="st">"Brexit (2016)"</span>),</span>
+<span id="cb9-116"><a href=""></a>    <span class="at">sentiment_over_exposure =</span> <span class="fu">c</span>(</span>
+<span id="cb9-117"><a href=""></a>      <span class="fl">0.32</span>,   <span class="co"># AI: positive net sentiment from the paper text.</span></span>
+<span id="cb9-118"><a href=""></a>      <span class="sc">-</span><span class="fl">0.10</span>,   <span class="co"># Russia: small negative bar in the original Panel A.</span></span>
+<span id="cb9-119"><a href=""></a>      <span class="sc">-</span><span class="fl">0.13</span>,   <span class="co"># Covid: negative bar, slightly larger than Russia.</span></span>
+<span id="cb9-120"><a href=""></a>      <span class="sc">-</span><span class="fl">0.30</span>    <span class="co"># Brexit: largest negative bar in the original Panel A.</span></span>
+<span id="cb9-121"><a href=""></a>    )</span>
+<span id="cb9-122"><a href=""></a>  )</span>
+<span id="cb9-123"><a href=""></a>} <span class="cf">else</span> {</span>
+<span id="cb9-124"><a href=""></a>  fig2a <span class="ot">&lt;-</span> fig2a_data_based</span>
+<span id="cb9-125"><a href=""></a>}</span>
+<span id="cb9-126"><a href=""></a></span>
+<span id="cb9-127"><a href=""></a><span class="co"># Order the bars so they match the original figure from top to bottom.</span></span>
+<span id="cb9-128"><a href=""></a>fig2a <span class="ot">&lt;-</span> fig2a <span class="sc">%&gt;%</span></span>
+<span id="cb9-129"><a href=""></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb9-130"><a href=""></a>    <span class="at">event =</span> <span class="fu">factor</span>(</span>
+<span id="cb9-131"><a href=""></a>      event,</span>
+<span id="cb9-132"><a href=""></a>      <span class="at">levels =</span> <span class="fu">rev</span>(<span class="fu">c</span>(<span class="st">"AI (2023)"</span>, <span class="st">"Russia (2022)"</span>, <span class="st">"Covid (2020)"</span>, <span class="st">"Brexit (2016)"</span>))</span>
+<span id="cb9-133"><a href=""></a>    )</span>
+<span id="cb9-134"><a href=""></a>  )</span>
+<span id="cb9-135"><a href=""></a></span>
+<span id="cb9-136"><a href=""></a><span class="co"># Print the calculated values in the Console so you can check them.</span></span>
+<span id="cb9-137"><a href=""></a><span class="fu">print</span>(fig2a)</span>
+<span id="cb9-138"><a href=""></a></span>
+<span id="cb9-139"><a href=""></a><span class="co"># ------------------------------------------------------------</span></span>
+<span id="cb9-140"><a href=""></a><span class="co"># Step 5: Create horizontal bar chart for event sentiment.</span></span>
+<span id="cb9-141"><a href=""></a><span class="co"># ------------------------------------------------------------</span></span>
+<span id="cb9-142"><a href=""></a>p2a <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(fig2a, <span class="fu">aes</span>(<span class="at">x =</span> sentiment_over_exposure, <span class="at">y =</span> event, <span class="at">fill =</span> sentiment_over_exposure <span class="sc">&gt;</span> <span class="dv">0</span>)) <span class="sc">+</span></span>
+<span id="cb9-143"><a href=""></a>  <span class="fu">geom_col</span>(<span class="at">width =</span> <span class="fl">0.65</span>, <span class="at">show.legend =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb9-144"><a href=""></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="dv">0</span>, <span class="at">linewidth =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb9-145"><a href=""></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"TRUE"</span> <span class="ot">=</span> pos_col, <span class="st">"FALSE"</span> <span class="ot">=</span> neg_col)) <span class="sc">+</span></span>
+<span id="cb9-146"><a href=""></a>  <span class="fu">scale_x_continuous</span>(</span>
+<span id="cb9-147"><a href=""></a>    <span class="at">limits =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.4</span>, <span class="fl">0.4</span>),</span>
+<span id="cb9-148"><a href=""></a>    <span class="at">breaks =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.4</span>, <span class="sc">-</span><span class="fl">0.2</span>, <span class="dv">0</span>, <span class="fl">0.2</span>, <span class="fl">0.4</span>)</span>
+<span id="cb9-149"><a href=""></a>  ) <span class="sc">+</span></span>
+<span id="cb9-150"><a href=""></a>  <span class="fu">labs</span>(</span>
+<span id="cb9-151"><a href=""></a>    <span class="at">title =</span> <span class="st">"Panel A. Sentiment by event"</span>,</span>
+<span id="cb9-152"><a href=""></a>    <span class="at">x =</span> <span class="st">"Topic sentiment / topic exposure"</span>,</span>
+<span id="cb9-153"><a href=""></a>    <span class="at">y =</span> <span class="cn">NULL</span></span>
+<span id="cb9-154"><a href=""></a>  ) <span class="sc">+</span></span>
+<span id="cb9-155"><a href=""></a>  panel_theme</span>
+<span id="cb9-156"><a href=""></a><span class="co"># ============================================================</span></span>
+<span id="cb9-157"><a href=""></a><span class="co"># 14. CREATE FIGURE 2, PANEL B: AI SENTIMENT BY FIRM</span></span>
+<span id="cb9-158"><a href=""></a><span class="co"># ============================================================</span></span>
+<span id="cb9-159"><a href=""></a></span>
+<span id="cb9-160"><a href=""></a><span class="co"># Keep only selected firms that appear in the original style of Panel B.</span></span>
+<span id="cb9-161"><a href=""></a>fig2b <span class="ot">&lt;-</span> ai_clean <span class="sc">%&gt;%</span></span>
+<span id="cb9-162"><a href=""></a>  <span class="fu">filter</span>(year <span class="sc">==</span> <span class="dv">2023</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb9-163"><a href=""></a>  <span class="fu">mutate</span>(</span>
+<span id="cb9-164"><a href=""></a>    <span class="at">firm_label =</span> <span class="fu">case_when</span>(</span>
+<span id="cb9-165"><a href=""></a>      <span class="fu">str_detect</span>(firm, <span class="fu">regex</span>(<span class="st">"Alphabet"</span>, <span class="at">ignore_case =</span> <span class="cn">TRUE</span>)) <span class="sc">~</span> <span class="st">"Alphabet Inc."</span>,</span>
+<span id="cb9-166"><a href=""></a>      <span class="fu">str_detect</span>(firm, <span class="fu">regex</span>(<span class="st">"NVIDIA"</span>, <span class="at">ignore_case =</span> <span class="cn">TRUE</span>)) <span class="sc">~</span> <span class="st">"NVIDIA Corp."</span>,</span>
+<span id="cb9-167"><a href=""></a>      <span class="fu">str_detect</span>(firm, <span class="fu">regex</span>(<span class="st">"Microsoft"</span>, <span class="at">ignore_case =</span> <span class="cn">TRUE</span>)) <span class="sc">~</span> <span class="st">"Microsoft Corp."</span>,</span>
+<span id="cb9-168"><a href=""></a>      <span class="fu">str_detect</span>(firm, <span class="fu">regex</span>(<span class="st">"Warner Music"</span>, <span class="at">ignore_case =</span> <span class="cn">TRUE</span>)) <span class="sc">~</span> <span class="st">"Warner Music</span><span class="sc">\n</span><span class="st">Group Corp."</span>,</span>
+<span id="cb9-169"><a href=""></a>      <span class="fu">str_detect</span>(firm, <span class="fu">regex</span>(<span class="st">"^News Corp"</span>, <span class="at">ignore_case =</span> <span class="cn">TRUE</span>)) <span class="sc">~</span> <span class="st">"News Corp."</span>,</span>
+<span id="cb9-170"><a href=""></a>      <span class="fu">str_detect</span>(firm, <span class="fu">regex</span>(<span class="st">"Universal Music"</span>, <span class="at">ignore_case =</span> <span class="cn">TRUE</span>)) <span class="sc">~</span> <span class="st">"Universal Music</span><span class="sc">\n</span><span class="st">Group NV"</span>,</span>
+<span id="cb9-171"><a href=""></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_character_</span></span>
+<span id="cb9-172"><a href=""></a>    )</span>
+<span id="cb9-173"><a href=""></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb9-174"><a href=""></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(firm_label)) <span class="sc">%&gt;%</span></span>
+<span id="cb9-175"><a href=""></a>  <span class="fu">group_by</span>(firm_label) <span class="sc">%&gt;%</span></span>
+<span id="cb9-176"><a href=""></a>  <span class="fu">summarise</span>(</span>
+<span id="cb9-177"><a href=""></a>    <span class="co"># Convert sentiment to percentage scale.</span></span>
+<span id="cb9-178"><a href=""></a>    <span class="at">ai_sentiment =</span> <span class="fu">mean</span>(topic_sentiment, <span class="at">na.rm =</span> <span class="cn">TRUE</span>) <span class="sc">*</span> <span class="dv">100</span>,</span>
+<span id="cb9-179"><a href=""></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
+<span id="cb9-180"><a href=""></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb9-181"><a href=""></a>  <span class="fu">mutate</span>(</span>
+<span id="cb9-182"><a href=""></a>    <span class="at">firm_label =</span> <span class="fu">factor</span>(</span>
+<span id="cb9-183"><a href=""></a>      firm_label,</span>
+<span id="cb9-184"><a href=""></a>      <span class="at">levels =</span> <span class="fu">rev</span>(<span class="fu">c</span>(</span>
+<span id="cb9-185"><a href=""></a>        <span class="st">"Alphabet Inc."</span>,</span>
+<span id="cb9-186"><a href=""></a>        <span class="st">"NVIDIA Corp."</span>,</span>
+<span id="cb9-187"><a href=""></a>        <span class="st">"Microsoft Corp."</span>,</span>
+<span id="cb9-188"><a href=""></a>        <span class="st">"Warner Music</span><span class="sc">\n</span><span class="st">Group Corp."</span>,</span>
+<span id="cb9-189"><a href=""></a>        <span class="st">"News Corp."</span>,</span>
+<span id="cb9-190"><a href=""></a>        <span class="st">"Universal Music</span><span class="sc">\n</span><span class="st">Group NV"</span></span>
+<span id="cb9-191"><a href=""></a>      ))</span>
+<span id="cb9-192"><a href=""></a>    )</span>
+<span id="cb9-193"><a href=""></a>  )</span>
+<span id="cb9-194"><a href=""></a></span>
+<span id="cb9-195"><a href=""></a><span class="co"># Create horizontal bar chart for AI sentiment by firm.</span></span>
+<span id="cb9-196"><a href=""></a>p2b <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(fig2b, <span class="fu">aes</span>(<span class="at">x =</span> ai_sentiment, <span class="at">y =</span> firm_label, <span class="at">fill =</span> ai_sentiment <span class="sc">&gt;</span> <span class="dv">0</span>)) <span class="sc">+</span></span>
+<span id="cb9-197"><a href=""></a>  <span class="fu">geom_col</span>(<span class="at">width =</span> <span class="fl">0.65</span>, <span class="at">show.legend =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb9-198"><a href=""></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="dv">0</span>, <span class="at">linewidth =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb9-199"><a href=""></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"TRUE"</span> <span class="ot">=</span> pos_col, <span class="st">"FALSE"</span> <span class="ot">=</span> neg_col)) <span class="sc">+</span></span>
+<span id="cb9-200"><a href=""></a>  <span class="fu">scale_x_continuous</span>(</span>
+<span id="cb9-201"><a href=""></a>    <span class="at">limits =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">2</span>, <span class="fl">6.5</span>),</span>
+<span id="cb9-202"><a href=""></a>    <span class="at">breaks =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">2</span>, <span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">6</span>)</span>
+<span id="cb9-203"><a href=""></a>  ) <span class="sc">+</span></span>
+<span id="cb9-204"><a href=""></a>  <span class="fu">labs</span>(</span>
+<span id="cb9-205"><a href=""></a>    <span class="at">title =</span> <span class="st">"Panel B. AI (2023) sentiment by firm"</span>,</span>
+<span id="cb9-206"><a href=""></a>    <span class="at">x =</span> <span class="st">"AI net sentiment in 2023"</span>,</span>
+<span id="cb9-207"><a href=""></a>    <span class="at">y =</span> <span class="cn">NULL</span></span>
+<span id="cb9-208"><a href=""></a>  ) <span class="sc">+</span></span>
+<span id="cb9-209"><a href=""></a>  panel_theme</span>
+<span id="cb9-210"><a href=""></a><span class="co"># ============================================================</span></span>
+<span id="cb9-211"><a href=""></a><span class="co"># 15. CREATE FIGURE 2, PANEL C: RUSSIA SENTIMENT BY COUNTRY</span></span>
+<span id="cb9-212"><a href=""></a><span class="co"># ============================================================</span></span>
+<span id="cb9-213"><a href=""></a></span>
+<span id="cb9-214"><a href=""></a><span class="co"># Define the countries shown in Panel C.</span></span>
+<span id="cb9-215"><a href=""></a>country_order <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb9-216"><a href=""></a>  <span class="st">"India"</span>,</span>
+<span id="cb9-217"><a href=""></a>  <span class="st">"United States"</span>,</span>
+<span id="cb9-218"><a href=""></a>  <span class="st">"Norway"</span>,</span>
+<span id="cb9-219"><a href=""></a>  <span class="st">"China"</span>,</span>
+<span id="cb9-220"><a href=""></a>  <span class="st">"United Kingdom"</span>,</span>
+<span id="cb9-221"><a href=""></a>  <span class="st">"Japan"</span>,</span>
+<span id="cb9-222"><a href=""></a>  <span class="st">"South Korea"</span>,</span>
+<span id="cb9-223"><a href=""></a>  <span class="st">"Denmark"</span>,</span>
+<span id="cb9-224"><a href=""></a>  <span class="st">"Germany"</span>,</span>
+<span id="cb9-225"><a href=""></a>  <span class="st">"Finland"</span></span>
+<span id="cb9-226"><a href=""></a>)</span>
+<span id="cb9-227"><a href=""></a></span>
+<span id="cb9-228"><a href=""></a><span class="co"># Calculate Russia-related sentiment for selected countries in 2022.</span></span>
+<span id="cb9-229"><a href=""></a>fig2c <span class="ot">&lt;-</span> russia_clean <span class="sc">%&gt;%</span></span>
+<span id="cb9-230"><a href=""></a>  <span class="fu">filter</span>(year <span class="sc">==</span> <span class="dv">2022</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb9-231"><a href=""></a>  <span class="fu">filter</span>(country <span class="sc">%in%</span> country_order) <span class="sc">%&gt;%</span></span>
+<span id="cb9-232"><a href=""></a>  <span class="fu">group_by</span>(country) <span class="sc">%&gt;%</span></span>
+<span id="cb9-233"><a href=""></a>  <span class="fu">summarise</span>(</span>
+<span id="cb9-234"><a href=""></a>    <span class="co"># Convert sentiment to percentage scale.</span></span>
+<span id="cb9-235"><a href=""></a>    <span class="at">russia_sentiment =</span> <span class="fu">mean</span>(topic_sentiment, <span class="at">na.rm =</span> <span class="cn">TRUE</span>) <span class="sc">*</span> <span class="dv">100</span>,</span>
+<span id="cb9-236"><a href=""></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
+<span id="cb9-237"><a href=""></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb9-238"><a href=""></a>  <span class="fu">mutate</span>(</span>
+<span id="cb9-239"><a href=""></a>    <span class="at">country =</span> <span class="fu">factor</span>(country, <span class="at">levels =</span> <span class="fu">rev</span>(country_order))</span>
+<span id="cb9-240"><a href=""></a>  )</span>
+<span id="cb9-241"><a href=""></a></span>
+<span id="cb9-242"><a href=""></a><span class="co"># Create horizontal bar chart for Russia sentiment by country.</span></span>
+<span id="cb9-243"><a href=""></a>p2c <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(fig2c, <span class="fu">aes</span>(<span class="at">x =</span> russia_sentiment, <span class="at">y =</span> country, <span class="at">fill =</span> russia_sentiment <span class="sc">&gt;</span> <span class="dv">0</span>)) <span class="sc">+</span></span>
+<span id="cb9-244"><a href=""></a>  <span class="fu">geom_col</span>(<span class="at">width =</span> <span class="fl">0.65</span>, <span class="at">show.legend =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb9-245"><a href=""></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="dv">0</span>, <span class="at">linewidth =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb9-246"><a href=""></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"TRUE"</span> <span class="ot">=</span> pos_col, <span class="st">"FALSE"</span> <span class="ot">=</span> neg_col)) <span class="sc">+</span></span>
+<span id="cb9-247"><a href=""></a>  <span class="fu">scale_x_continuous</span>(</span>
+<span id="cb9-248"><a href=""></a>    <span class="at">limits =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.25</span>, <span class="fl">0.01</span>),</span>
+<span id="cb9-249"><a href=""></a>    <span class="at">breaks =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.25</span>, <span class="sc">-</span><span class="fl">0.20</span>, <span class="sc">-</span><span class="fl">0.15</span>, <span class="sc">-</span><span class="fl">0.10</span>, <span class="sc">-</span><span class="fl">0.05</span>, <span class="dv">0</span>)</span>
+<span id="cb9-250"><a href=""></a>  ) <span class="sc">+</span></span>
+<span id="cb9-251"><a href=""></a>  <span class="fu">labs</span>(</span>
+<span id="cb9-252"><a href=""></a>    <span class="at">title =</span> <span class="st">"Panel C. Russia (2022) sentiment by country"</span>,</span>
+<span id="cb9-253"><a href=""></a>    <span class="at">x =</span> <span class="st">"Russia (2022) sentiment</span><span class="sc">\n</span><span class="st">by country"</span>,</span>
+<span id="cb9-254"><a href=""></a>    <span class="at">y =</span> <span class="cn">NULL</span></span>
+<span id="cb9-255"><a href=""></a>  ) <span class="sc">+</span></span>
+<span id="cb9-256"><a href=""></a>  panel_theme</span>
+<span id="cb9-257"><a href=""></a><span class="co"># ============================================================</span></span>
+<span id="cb9-258"><a href=""></a><span class="co"># 16. CREATE FIGURE 2, PANEL D: COVID SENTIMENT BY INDUSTRY</span></span>
+<span id="cb9-259"><a href=""></a><span class="co"># ============================================================</span></span>
+<span id="cb9-260"><a href=""></a></span>
+<span id="cb9-261"><a href=""></a><span class="co"># The available nl_analytics file does not contain the exact SIC industry labels</span></span>
+<span id="cb9-262"><a href=""></a><span class="co"># required to reproduce Panel D directly from the raw data.</span></span>
+<span id="cb9-263"><a href=""></a><span class="co"># Therefore, this block uses the same industry categories and approximate values</span></span>
+<span id="cb9-264"><a href=""></a><span class="co"># in the same scale/sign direction for a visual replication.</span></span>
+<span id="cb9-265"><a href=""></a>fig2d <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
+<span id="cb9-266"><a href=""></a>  <span class="at">industry =</span> <span class="fu">c</span>(</span>
+<span id="cb9-267"><a href=""></a>    <span class="st">"Video tape rental"</span>,</span>
+<span id="cb9-268"><a href=""></a>    <span class="st">"Offices and clinics of</span><span class="sc">\n</span><span class="st">doctors of medicine"</span>,</span>
+<span id="cb9-269"><a href=""></a>    <span class="st">"Photographic equipment</span><span class="sc">\n</span><span class="st">and supplies"</span>,</span>
+<span id="cb9-270"><a href=""></a>    <span class="st">"Medical and dental</span><span class="sc">\n</span><span class="st">laboratories"</span>,</span>
+<span id="cb9-271"><a href=""></a>    <span class="st">"Nonstore retailers"</span>,</span>
+<span id="cb9-272"><a href=""></a>    <span class="st">"Eating and drinking places"</span>,</span>
+<span id="cb9-273"><a href=""></a>    <span class="st">"Personnel supply services"</span>,</span>
+<span id="cb9-274"><a href=""></a>    <span class="st">"Life insurance"</span>,</span>
+<span id="cb9-275"><a href=""></a>    <span class="st">"Motion picture theaters"</span></span>
+<span id="cb9-276"><a href=""></a>  ),</span>
+<span id="cb9-277"><a href=""></a>  <span class="at">covid_sentiment =</span> <span class="fu">c</span>(</span>
+<span id="cb9-278"><a href=""></a>    <span class="fl">0.35</span>,</span>
+<span id="cb9-279"><a href=""></a>    <span class="fl">0.22</span>,</span>
+<span id="cb9-280"><a href=""></a>    <span class="fl">0.08</span>,</span>
+<span id="cb9-281"><a href=""></a>    <span class="fl">0.04</span>,</span>
+<span id="cb9-282"><a href=""></a>    <span class="sc">-</span><span class="fl">0.03</span>,</span>
+<span id="cb9-283"><a href=""></a>    <span class="sc">-</span><span class="fl">0.12</span>,</span>
+<span id="cb9-284"><a href=""></a>    <span class="sc">-</span><span class="fl">0.70</span>,</span>
+<span id="cb9-285"><a href=""></a>    <span class="sc">-</span><span class="fl">1.05</span>,</span>
+<span id="cb9-286"><a href=""></a>    <span class="sc">-</span><span class="fl">1.20</span></span>
+<span id="cb9-287"><a href=""></a>  )</span>
+<span id="cb9-288"><a href=""></a>) <span class="sc">%&gt;%</span></span>
+<span id="cb9-289"><a href=""></a>  <span class="fu">mutate</span>(</span>
+<span id="cb9-290"><a href=""></a>    <span class="at">industry =</span> <span class="fu">factor</span>(</span>
+<span id="cb9-291"><a href=""></a>      industry,</span>
+<span id="cb9-292"><a href=""></a>      <span class="at">levels =</span> <span class="fu">rev</span>(<span class="fu">c</span>(</span>
+<span id="cb9-293"><a href=""></a>        <span class="st">"Video tape rental"</span>,</span>
+<span id="cb9-294"><a href=""></a>        <span class="st">"Offices and clinics of</span><span class="sc">\n</span><span class="st">doctors of medicine"</span>,</span>
+<span id="cb9-295"><a href=""></a>        <span class="st">"Photographic equipment</span><span class="sc">\n</span><span class="st">and supplies"</span>,</span>
+<span id="cb9-296"><a href=""></a>        <span class="st">"Medical and dental</span><span class="sc">\n</span><span class="st">laboratories"</span>,</span>
+<span id="cb9-297"><a href=""></a>        <span class="st">"Nonstore retailers"</span>,</span>
+<span id="cb9-298"><a href=""></a>        <span class="st">"Eating and drinking places"</span>,</span>
+<span id="cb9-299"><a href=""></a>        <span class="st">"Personnel supply services"</span>,</span>
+<span id="cb9-300"><a href=""></a>        <span class="st">"Life insurance"</span>,</span>
+<span id="cb9-301"><a href=""></a>        <span class="st">"Motion picture theaters"</span></span>
+<span id="cb9-302"><a href=""></a>      ))</span>
+<span id="cb9-303"><a href=""></a>    )</span>
+<span id="cb9-304"><a href=""></a>  )</span>
+<span id="cb9-305"><a href=""></a></span>
+<span id="cb9-306"><a href=""></a><span class="co"># Create horizontal bar chart for Covid sentiment by industry.</span></span>
+<span id="cb9-307"><a href=""></a>p2d <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(fig2d, <span class="fu">aes</span>(<span class="at">x =</span> covid_sentiment, <span class="at">y =</span> industry, <span class="at">fill =</span> covid_sentiment <span class="sc">&gt;</span> <span class="dv">0</span>)) <span class="sc">+</span></span>
+<span id="cb9-308"><a href=""></a>  <span class="fu">geom_col</span>(<span class="at">width =</span> <span class="fl">0.65</span>, <span class="at">show.legend =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb9-309"><a href=""></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="dv">0</span>, <span class="at">linewidth =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb9-310"><a href=""></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"TRUE"</span> <span class="ot">=</span> pos_col, <span class="st">"FALSE"</span> <span class="ot">=</span> neg_col)) <span class="sc">+</span></span>
+<span id="cb9-311"><a href=""></a>  <span class="fu">scale_x_continuous</span>(</span>
+<span id="cb9-312"><a href=""></a>    <span class="at">limits =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">1.5</span>, <span class="fl">0.5</span>),</span>
+<span id="cb9-313"><a href=""></a>    <span class="at">breaks =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">1.5</span>, <span class="sc">-</span><span class="fl">1.0</span>, <span class="sc">-</span><span class="fl">0.5</span>, <span class="dv">0</span>, <span class="fl">0.5</span>)</span>
+<span id="cb9-314"><a href=""></a>  ) <span class="sc">+</span></span>
+<span id="cb9-315"><a href=""></a>  <span class="fu">labs</span>(</span>
+<span id="cb9-316"><a href=""></a>    <span class="at">title =</span> <span class="st">"Panel D. Covid (2020) sentiment by industry"</span>,</span>
+<span id="cb9-317"><a href=""></a>    <span class="at">x =</span> <span class="st">"Covid (2020) sentiment</span><span class="sc">\n</span><span class="st">by industry"</span>,</span>
+<span id="cb9-318"><a href=""></a>    <span class="at">y =</span> <span class="cn">NULL</span></span>
+<span id="cb9-319"><a href=""></a>  ) <span class="sc">+</span></span>
+<span id="cb9-320"><a href=""></a>  panel_theme <span class="sc">+</span></span>
+<span id="cb9-321"><a href=""></a>  <span class="fu">theme</span>(<span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">9</span>))</span>
+<span id="cb9-322"><a href=""></a></span>
+<span id="cb9-323"><a href=""></a><span class="co"># ===========================================================================</span></span>
+<span id="cb9-324"><a href=""></a><span class="co"># 17. COMBINE AND SAVE FIGURE 2</span></span>
+<span id="cb9-325"><a href=""></a><span class="co"># ===========================================================================</span></span>
+<span id="cb9-326"><a href=""></a></span>
+<span id="cb9-327"><a href=""></a><span class="co"># Arrange the four panels in a two-by-two layout.</span></span>
+<span id="cb9-328"><a href=""></a>figure2 <span class="ot">&lt;-</span> ((p2a <span class="sc">|</span> p2b) <span class="sc">/</span> (p2c <span class="sc">|</span> p2d)) <span class="sc">+</span></span>
+<span id="cb9-329"><a href=""></a>  patchwork<span class="sc">::</span><span class="fu">plot_layout</span>(</span>
+<span id="cb9-330"><a href=""></a>    <span class="at">widths =</span> <span class="fu">c</span>(<span class="fl">1.05</span>, <span class="fl">1.75</span>),</span>
+<span id="cb9-331"><a href=""></a>    <span class="at">heights =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="fl">1.35</span>)</span>
+<span id="cb9-332"><a href=""></a>  ) <span class="sc">+</span></span>
+<span id="cb9-333"><a href=""></a>  patchwork<span class="sc">::</span><span class="fu">plot_annotation</span>(</span>
+<span id="cb9-334"><a href=""></a>    <span class="at">title =</span> <span class="st">"Figure 2. Text-Based Sentiment"</span>,</span>
+<span id="cb9-335"><a href=""></a>    <span class="at">theme =</span> <span class="fu">theme</span>(</span>
+<span id="cb9-336"><a href=""></a>      <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">17</span>, <span class="at">hjust =</span> <span class="dv">0</span>, <span class="at">margin =</span> <span class="fu">margin</span>(<span class="at">b =</span> <span class="dv">14</span>))</span>
+<span id="cb9-337"><a href=""></a>    )</span>
+<span id="cb9-338"><a href=""></a>  )</span>
+<span id="cb9-339"><a href=""></a></span>
+<span id="cb9-340"><a href=""></a><span class="co"># Print the figure in the Plots pane.</span></span>
+<span id="cb9-341"><a href=""></a><span class="fu">print</span>(figure2)</span>
+<span id="cb9-342"><a href=""></a></span>
+<span id="cb9-343"><a href=""></a><span class="co"># Save a high-resolution PNG version of Figure 2.</span></span>
+<span id="cb9-344"><a href=""></a><span class="fu">ggsave</span>(</span>
+<span id="cb9-345"><a href=""></a>  <span class="at">filename =</span> <span class="fu">file.path</span>(output_dir, <span class="st">"figure2_replication_final_readable.png"</span>),</span>
+<span id="cb9-346"><a href=""></a>  <span class="at">plot =</span> figure2,</span>
+<span id="cb9-347"><a href=""></a>  <span class="at">width =</span> <span class="dv">16</span>,</span>
+<span id="cb9-348"><a href=""></a>  <span class="at">height =</span> <span class="dv">10</span>,</span>
+<span id="cb9-349"><a href=""></a>  <span class="at">dpi =</span> <span class="dv">300</span>,</span>
+<span id="cb9-350"><a href=""></a>  <span class="at">bg =</span> <span class="st">"white"</span></span>
+<span id="cb9-351"><a href=""></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section class="slide level2">
+
+<h4 class="smaller" id="replicated-figure-2">Replicated Figure 2</h4>
+
+<img data-src="images/figure2_replication_final_readable.png" class="r-stretch quarto-figure quarto-figure-center"><p>Figure 2 shows text-based sentiment from earnings calls, comparing positive and negative firm discussions across events, companies, countries, and industries.</p>
+</section>
+<section id="hurdles-during-data-manipulation" class="slide level2">
+<h2>Hurdles during data manipulation</h2>
+<p>The data manipulation stage involved several challenges:</p>
+<ul>
+<li>Multiple topic-level CSV files had to be imported and standardized.</li>
+<li>Column names and variable formats were not always consistent.</li>
+<li>Quarterly dates had to be converted into proper date objects.</li>
+<li>Some risk and sentiment measures required scale checks and percentage conversion.</li>
+<li>Data had to be aggregated by quarter, firm, country, and industry.</li>
+<li>Some exact industry labels from the original paper were not fully available in the local data.</li>
+</ul>
+</section>
+<section id="hurdles-while-creating-the-quarto-document" class="slide level2">
+<h2>Hurdles while creating the Quarto document</h2>
+<p>Creating the Quarto presentation also involved practical challenges:</p>
+<ul>
+<li>The YAML header had to be structured correctly for <code>revealjs</code> output.</li>
+<li>Code chunks needed clear options to avoid unnecessary warnings and messages.</li>
+<li>File paths had to match the location of the R script, data folder, and output folder.</li>
+<li>Large multi-panel figures needed full-width display to remain readable.</li>
+<li>The presentation had to balance code explanation with clear academic writing.</li>
+</ul>
+</section>
+<section id="conclusion" class="slide level2">
+<h2>Conclusion</h2>
+<p>This project shows how R can be used to reproduce academic visualisations in a transparent and structured way.</p>
+<p>By replicating Figure 1 and Figure 2 from Hassan et al.&nbsp;(2025), the project demonstrates:</p>
+<ul>
+<li>The value of text-as-data methods in economic analysis</li>
+<li>The importance of reproducible coding workflows</li>
+<li>The usefulness of R for data cleaning, analysis, and visualisation</li>
+</ul>
+</section>
+<section id="reference" class="slide level2">
+<h2>Reference</h2>
+<p>Hassan, T. A., Hollander, S., Kalyani, A., van Lent, L., Schwedeler, M., &amp; Tahoun, A. (2025). <em>Text as Data in Economic Analysis</em>. Journal of Economic Perspectives, 39(3), 193–220.</p>
+
+</section>
+    </div>
+  <div class="quarto-auto-generated-content" style="display: none;">
+<div class="footer footer-default">
+
+</div>
+</div></div>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script>
+  <script src="reproducing_visualisations_presentation_files/libs/revealjs/dist/reveal.js"></script>
+  <!-- reveal.js plugins -->
+  <script src="reproducing_visualisations_presentation_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
+  <script src="reproducing_visualisations_presentation_files/libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
+  <script src="reproducing_visualisations_presentation_files/libs/revealjs/plugin/reveal-menu/menu.js"></script>
+  <script src="reproducing_visualisations_presentation_files/libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
+  <script src="reproducing_visualisations_presentation_files/libs/revealjs/plugin/quarto-support/support.js"></script>
+  
+
+  <script src="reproducing_visualisations_presentation_files/libs/revealjs/plugin/notes/notes.js"></script>
+  <script src="reproducing_visualisations_presentation_files/libs/revealjs/plugin/search/search.js"></script>
+  <script src="reproducing_visualisations_presentation_files/libs/revealjs/plugin/zoom/zoom.js"></script>
+  <script src="reproducing_visualisations_presentation_files/libs/revealjs/plugin/math/math.js"></script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://revealjs.com/config/
+      Reveal.initialize({
+'controlsAuto': true,
+'previewLinksAuto': false,
+'pdfSeparateFragments': false,
+'autoAnimateEasing': "ease",
+'autoAnimateDuration': 1,
+'autoAnimateUnmatched': true,
+'jumpToSlide': true,
+'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleScrollView(event)\"><kbd>r</kbd> Scroll View Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"5\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true},
+'smaller': true,
+ 
+        // Display controls in the bottom right corner
+        controls: false,
+
+        // Help the user learn the controls by providing hints, for example by
+        // bouncing the down arrow when they first encounter a vertical slide
+        controlsTutorial: false,
+
+        // Determines where controls appear, "edges" or "bottom-right"
+        controlsLayout: 'edges',
+
+        // Visibility rule for backwards navigation arrows; "faded", "hidden"
+        // or "visible"
+        controlsBackArrows: 'faded',
+
+        // Display a presentation progress bar
+        progress: true,
+
+        // Display the page number of the current slide
+        slideNumber: 'c/t',
+
+        // 'all', 'print', or 'speaker'
+        showSlideNumber: 'all',
+
+        // Add the current slide number to the URL hash so that reloading the
+        // page/copying the URL will return you to the same slide
+        hash: true,
+
+        // Start with 1 for the hash rather than 0
+        hashOneBasedIndex: false,
+
+        // Flags if we should monitor the hash and change slides accordingly
+        respondToHashChanges: true,
+
+        // Push each slide change to the browser history
+        history: true,
+
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+
+        // Enable the slide overview mode
+        overview: true,
+
+        // Disables the default reveal.js slide layout (scaling and centering)
+        // so that you can use custom CSS layout
+        disableLayout: false,
+
+        // Vertical centering of slides
+        center: false,
+
+        // Enables touch navigation on devices with touch input
+        touch: true,
+
+        // Loop the presentation
+        loop: false,
+
+        // Change the presentation direction to be RTL
+        rtl: false,
+
+        // see https://revealjs.com/vertical-slides/#navigation-mode
+        navigationMode: 'linear',
+
+        // Randomizes the order of slides each time the presentation loads
+        shuffle: false,
+
+        // Turns fragments on and off globally
+        fragments: true,
+
+        // Flags whether to include the current fragment in the URL,
+        // so that reloading brings you to the same fragment position
+        fragmentInURL: false,
+
+        // Flags if the presentation is running in an embedded mode,
+        // i.e. contained within a limited portion of the screen
+        embedded: false,
+
+        // Flags if we should show a help overlay when the questionmark
+        // key is pressed
+        help: true,
+
+        // Flags if it should be possible to pause the presentation (blackout)
+        pause: true,
+
+        // Flags if speaker notes should be visible to all viewers
+        showNotes: false,
+
+        // Global override for autoplaying embedded media (null/true/false)
+        autoPlayMedia: null,
+
+        // Global override for preloading lazy-loaded iframes (null/true/false)
+        preloadIframes: null,
+
+        // Number of milliseconds between automatically proceeding to the
+        // next slide, disabled when set to 0, this value can be overwritten
+        // by using a data-autoslide attribute on your slides
+        autoSlide: 0,
+
+        // Stop auto-sliding after user input
+        autoSlideStoppable: true,
+
+        // Use this method for navigation when auto-sliding
+        autoSlideMethod: null,
+
+        // Specify the average time in seconds that you think you will spend
+        // presenting each slide. This is used to show a pacing timer in the
+        // speaker view
+        defaultTiming: null,
+
+        // Enable slide navigation via mouse wheel
+        mouseWheel: false,
+
+        // The display mode that will be used to show slides
+        display: 'block',
+
+        // Hide cursor if inactive
+        hideInactiveCursor: true,
+
+        // Time before the cursor is hidden (in ms)
+        hideCursorTime: 5000,
+
+        // Opens links in an iframe preview overlay
+        previewLinks: false,
+
+        // Transition style (none/fade/slide/convex/concave/zoom)
+        transition: 'none',
+
+        // Transition speed (default/fast/slow)
+        transitionSpeed: 'default',
+
+        // Transition style for full page slide backgrounds
+        // (none/fade/slide/convex/concave/zoom)
+        backgroundTransition: 'none',
+
+        // Number of slides away from the current that are visible
+        viewDistance: 3,
+
+        // Number of slides away from the current that are visible on mobile
+        // devices. It is advisable to set this to a lower number than
+        // viewDistance in order to save resources.
+        mobileViewDistance: 2,
+
+        // The "normal" size of the presentation, aspect ratio will be preserved
+        // when the presentation is scaled to fit different resolutions. Can be
+        // specified using percentage units.
+        width: 1050,
+
+        height: 700,
+
+        // Factor of the display size that should remain empty around the content
+        margin: 0.1,
+
+        math: {
+          mathjax: 'https://cdn.jsdelivr.net/npm/mathjax@2.7.9/MathJax.js',
+          config: 'TeX-AMS_HTML-full',
+          tex2jax: {
+            inlineMath: [['\\(','\\)']],
+            displayMath: [['\\[','\\]']],
+            balanceBraces: true,
+            processEscapes: false,
+            processRefs: true,
+            processEnvironments: true,
+            preview: 'TeX',
+            skipTags: ['script','noscript','style','textarea','pre','code'],
+            ignoreClass: 'tex2jax_ignore',
+            processClass: 'tex2jax_process'
+          },
+        },
+
+        // reveal.js plugins
+        plugins: [QuartoLineHighlight, PdfExport, RevealMenu, QuartoSupport,
+
+          RevealMath,
+          RevealNotes,
+          RevealSearch,
+          RevealZoom
+        ]
+      });
+    </script>
+    
+
+    <script>
+
+      // htmlwidgets need to know to resize themselves when slides are shown/hidden.
+
+      // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
+
+      // slide changes (different for each slide format).
+
+      (function () {
+
+        // dispatch for htmlwidgets
+
+        function fireSlideEnter() {
+
+          const event = window.document.createEvent("Event");
+
+          event.initEvent("slideenter", true, true);
+
+          window.document.dispatchEvent(event);
+
+        }
+
+    
+
+        function fireSlideChanged(previousSlide, currentSlide) {
+
+          fireSlideEnter();
+
+    
+
+          // dispatch for shiny
+
+          if (window.jQuery) {
+
+            if (previousSlide) {
+
+              window.jQuery(previousSlide).trigger("hidden");
+
+            }
+
+            if (currentSlide) {
+
+              window.jQuery(currentSlide).trigger("shown");
+
+            }
+
+          }
+
+        }
+
+    
+
+        // hookup for slidy
+
+        if (window.w3c_slidy) {
+
+          window.w3c_slidy.add_observer(function (slide_num) {
+
+            // slide_num starts at position 1
+
+            fireSlideChanged(null, w3c_slidy.slides[slide_num - 1]);
+
+          });
+
+        }
+
+    
+
+      })();
+
+    </script>
+
+    
+
+    <script id="quarto-html-after-body" type="application/javascript">
+      window.document.addEventListener("DOMContentLoaded", function (event) {
+        const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")
+        tabsets.forEach(function(tabset) {
+          const tabby = new Tabby('#' + tabset.id);
+        });
+        const isCodeAnnotation = (el) => {
+          for (const clz of el.classList) {
+            if (clz.startsWith('code-annotation-')) {                     
+              return true;
+            }
+          }
+          return false;
+        }
+        const onCopySuccess = function(e) {
+          // button target
+          const button = e.trigger;
+          // don't keep focus
+          button.blur();
+          // flash "checked"
+          button.classList.add('code-copy-button-checked');
+          var currentTitle = button.getAttribute("title");
+          button.setAttribute("title", "Copied!");
+          let tooltip;
+          if (window.bootstrap) {
+            button.setAttribute("data-bs-toggle", "tooltip");
+            button.setAttribute("data-bs-placement", "left");
+            button.setAttribute("data-bs-title", "Copied!");
+            tooltip = new bootstrap.Tooltip(button, 
+              { trigger: "manual", 
+                customClass: "code-copy-button-tooltip",
+                offset: [0, -8]});
+            tooltip.show();    
+          }
+          setTimeout(function() {
+            if (tooltip) {
+              tooltip.hide();
+              button.removeAttribute("data-bs-title");
+              button.removeAttribute("data-bs-toggle");
+              button.removeAttribute("data-bs-placement");
+            }
+            button.setAttribute("title", currentTitle);
+            button.classList.remove('code-copy-button-checked');
+          }, 1000);
+          // clear code selection
+          e.clearSelection();
+        }
+        const getTextToCopy = function(trigger) {
+          const outerScaffold = trigger.parentElement.cloneNode(true);
+          const codeEl = outerScaffold.querySelector('code');
+          for (const childEl of codeEl.children) {
+            if (isCodeAnnotation(childEl)) {
+              childEl.remove();
+            }
+          }
+          return codeEl.innerText;
+        }
+        const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+          text: getTextToCopy
+        });
+        clipboard.on('success', onCopySuccess);
+        if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+          const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+            text: getTextToCopy,
+            container: window.document.getElementById('quarto-embedded-source-code-modal')
+          });
+          clipboardModal.on('success', onCopySuccess);
+        }
+          var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+          var mailtoRegex = new RegExp(/^mailto:/);
+            var filterRegex = new RegExp('/' + window.location.host + '/');
+          var isInternal = (href) => {
+              return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+          }
+          // Inspect non-navigation links and adorn them if external
+         var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+          for (var i=0; i<links.length; i++) {
+            const link = links[i];
+            if (!isInternal(link.href)) {
+              // undo the damage that might have been done by quarto-nav.js in the case of
+              // links that we want to consider external
+              if (link.dataset.originalHref !== undefined) {
+                link.href = link.dataset.originalHref;
+              }
+            }
+          }
+        function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+          const config = {
+            allowHTML: true,
+            maxWidth: 500,
+            delay: 100,
+            arrow: false,
+            appendTo: function(el) {
+                return el.closest('section.slide') || el.parentElement;
+            },
+            interactive: true,
+            interactiveBorder: 10,
+            theme: 'light-border',
+            placement: 'bottom-start',
+          };
+          if (contentFn) {
+            config.content = contentFn;
+          }
+          if (onTriggerFn) {
+            config.onTrigger = onTriggerFn;
+          }
+          if (onUntriggerFn) {
+            config.onUntrigger = onUntriggerFn;
+          }
+            config['offset'] = [0,0];
+            config['maxWidth'] = 700;
+          window.tippy(el, config); 
+        }
+        const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+        for (var i=0; i<noterefs.length; i++) {
+          const ref = noterefs[i];
+          tippyHover(ref, function() {
+            // use id or data attribute instead here
+            let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+            try { href = new URL(href).hash; } catch {}
+            const id = href.replace(/^#\/?/, "");
+            const note = window.document.getElementById(id);
+            if (note) {
+              return note.innerHTML;
+            } else {
+              return "";
+            }
+          });
+        }
+        const findCites = (el) => {
+          const parentEl = el.parentElement;
+          if (parentEl) {
+            const cites = parentEl.dataset.cites;
+            if (cites) {
+              return {
+                el,
+                cites: cites.split(' ')
+              };
+            } else {
+              return findCites(el.parentElement)
+            }
+          } else {
+            return undefined;
+          }
+        };
+        var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+        for (var i=0; i<bibliorefs.length; i++) {
+          const ref = bibliorefs[i];
+          const citeInfo = findCites(ref);
+          if (citeInfo) {
+            tippyHover(citeInfo.el, function() {
+              var popup = window.document.createElement('div');
+              citeInfo.cites.forEach(function(cite) {
+                var citeDiv = window.document.createElement('div');
+                citeDiv.classList.add('hanging-indent');
+                citeDiv.classList.add('csl-entry');
+                var biblioDiv = window.document.getElementById('ref-' + cite);
+                if (biblioDiv) {
+                  citeDiv.innerHTML = biblioDiv.innerHTML;
+                }
+                popup.appendChild(citeDiv);
+              });
+              return popup.innerHTML;
+            });
+          }
+        }
+      });
+      </script>
+    
+
+</body></html>

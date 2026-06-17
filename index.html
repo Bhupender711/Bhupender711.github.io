@@ -6,8 +6,8 @@
 <script src="reproducing_visualisations_presentation_files/libs/quarto-html/tippy.umd.min.js"></script>
 <link href="reproducing_visualisations_presentation_files/libs/quarto-html/tippy.css" rel="stylesheet">
 <link href="reproducing_visualisations_presentation_files/libs/quarto-html/light-border.css" rel="stylesheet">
-<link href="reproducing_visualisations_presentation_files/libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
-  <meta name="generator" content="quarto-1.9.37">
+<link href="reproducing_visualisations_presentation_files/libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+  <meta name="generator" content="quarto-1.9.38">
 
   <meta name="author" content="Bhupender Singh">
   <meta name="dcterms.date" content="2026-06-16">
@@ -413,7 +413,7 @@ Bhupender Singh
 <span id="cb3-66"><a href=""></a>nl_dir <span class="ot">&lt;-</span> <span class="fu">file.path</span>(project_dir, <span class="st">"nl_analytics"</span>)</span>
 <span id="cb3-67"><a href=""></a></span>
 <span id="cb3-68"><a href=""></a><span class="co"># Define the folder where final figures will be saved.</span></span>
-<span id="cb3-69"><a href=""></a>output_dir <span class="ot">&lt;-</span> <span class="fu">file.path</span>(project_dir, <span class="st">"output"</span>)</span>
+<span id="cb3-69"><a href=""></a>output_dir <span class="ot">&lt;-</span> <span class="fu">file.path</span>(project_dir, <span class="st">"Presentation_Fig"</span>)</span>
 <span id="cb3-70"><a href=""></a></span>
 <span id="cb3-71"><a href=""></a><span class="co"># Create the output folder if it does not already exist.</span></span>
 <span id="cb3-72"><a href=""></a><span class="fu">dir.create</span>(output_dir, <span class="at">showWarnings =</span> <span class="cn">FALSE</span>, <span class="at">recursive =</span> <span class="cn">TRUE</span>)</span>
@@ -438,85 +438,111 @@ Bhupender Singh
 <span id="cb4-2"><a href=""></a><span class="co"># 3. DEFINE HELPER FUNCTIONS</span></span>
 <span id="cb4-3"><a href=""></a><span class="co"># ============================================================</span></span>
 <span id="cb4-4"><a href=""></a></span>
-<span id="cb4-5"><a href=""></a><span class="co"># This function reads one topic CSV file from the nl_analytics folder.</span></span>
-<span id="cb4-6"><a href=""></a><span class="co"># It also cleans column names so they are easier to use in R.</span></span>
-<span id="cb4-7"><a href=""></a>read_topic_csv <span class="ot">&lt;-</span> <span class="cf">function</span>(file_name) {</span>
-<span id="cb4-8"><a href=""></a>  file_path <span class="ot">&lt;-</span> <span class="fu">file.path</span>(nl_dir, file_name)</span>
-<span id="cb4-9"><a href=""></a>  </span>
-<span id="cb4-10"><a href=""></a>  <span class="co"># Stop with a clear message if the file is missing.</span></span>
-<span id="cb4-11"><a href=""></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">file.exists</span>(file_path)) {</span>
-<span id="cb4-12"><a href=""></a>    <span class="fu">stop</span>(<span class="st">"File not found: "</span>, file_path)</span>
-<span id="cb4-13"><a href=""></a>  }</span>
+<span id="cb4-5"><a href=""></a><span class="co"># This function reads one CSV file from the data folder.</span></span>
+<span id="cb4-6"><a href=""></a><span class="co"># It first looks for the exact file name, then allows uploaded duplicate names</span></span>
+<span id="cb4-7"><a href=""></a><span class="co"># such as covid(2).csv by searching for files that begin with the same stem.</span></span>
+<span id="cb4-8"><a href=""></a>read_topic_csv <span class="ot">&lt;-</span> <span class="cf">function</span>(file_name, <span class="at">required =</span> <span class="cn">TRUE</span>) {</span>
+<span id="cb4-9"><a href=""></a>  exact_paths <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb4-10"><a href=""></a>    <span class="fu">file.path</span>(nl_dir, file_name),</span>
+<span id="cb4-11"><a href=""></a>    <span class="fu">file.path</span>(project_dir, file_name),</span>
+<span id="cb4-12"><a href=""></a>    <span class="fu">file.path</span>(<span class="fu">getwd</span>(), file_name)</span>
+<span id="cb4-13"><a href=""></a>  )</span>
 <span id="cb4-14"><a href=""></a>  </span>
-<span id="cb4-15"><a href=""></a>  <span class="co"># fread() is used because it is fast for large CSV files.</span></span>
-<span id="cb4-16"><a href=""></a>  data <span class="ot">&lt;-</span> data.table<span class="sc">::</span><span class="fu">fread</span>(file_path)</span>
-<span id="cb4-17"><a href=""></a>  </span>
-<span id="cb4-18"><a href=""></a>  <span class="co"># clean_names() converts names like "Company Name" into "company_name".</span></span>
-<span id="cb4-19"><a href=""></a>  data <span class="ot">&lt;-</span> janitor<span class="sc">::</span><span class="fu">clean_names</span>(data)</span>
-<span id="cb4-20"><a href=""></a>  </span>
-<span id="cb4-21"><a href=""></a>  <span class="fu">return</span>(data)</span>
-<span id="cb4-22"><a href=""></a>}</span>
-<span id="cb4-23"><a href=""></a></span>
-<span id="cb4-24"><a href=""></a></span>
-<span id="cb4-25"><a href=""></a><span class="co"># This function standardizes each topic data file.</span></span>
-<span id="cb4-26"><a href=""></a><span class="co"># It creates common columns such as topic, year, quarter, firm, country, and industry.</span></span>
-<span id="cb4-27"><a href=""></a>clean_topic_file <span class="ot">&lt;-</span> <span class="cf">function</span>(df, topic_name) {</span>
-<span id="cb4-28"><a href=""></a>  </span>
-<span id="cb4-29"><a href=""></a>  df <span class="ot">&lt;-</span> janitor<span class="sc">::</span><span class="fu">clean_names</span>(df)</span>
-<span id="cb4-30"><a href=""></a>  </span>
-<span id="cb4-31"><a href=""></a>  out <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span></span>
-<span id="cb4-32"><a href=""></a>    <span class="fu">mutate</span>(</span>
-<span id="cb4-33"><a href=""></a>      <span class="co"># Add topic name so each row can be identified after combining data.</span></span>
-<span id="cb4-34"><a href=""></a>      <span class="at">topic =</span> topic_name,</span>
-<span id="cb4-35"><a href=""></a>      </span>
-<span id="cb4-36"><a href=""></a>      <span class="co"># Convert quarterly date into Date format and extract year/quarter.</span></span>
-<span id="cb4-37"><a href=""></a>      <span class="at">date_q =</span> <span class="fu">as.Date</span>(date_q),</span>
-<span id="cb4-38"><a href=""></a>      <span class="at">year =</span> lubridate<span class="sc">::</span><span class="fu">year</span>(date_q),</span>
-<span id="cb4-39"><a href=""></a>      <span class="at">quarter =</span> lubridate<span class="sc">::</span><span class="fu">quarter</span>(date_q),</span>
-<span id="cb4-40"><a href=""></a>      <span class="at">qtr =</span> <span class="fu">paste0</span>(year, <span class="st">" Q"</span>, quarter),</span>
-<span id="cb4-41"><a href=""></a>      <span class="at">qtr_date =</span> date_q,</span>
-<span id="cb4-42"><a href=""></a>      </span>
-<span id="cb4-43"><a href=""></a>      <span class="co"># Convert main text measures into numeric form.</span></span>
-<span id="cb4-44"><a href=""></a>      <span class="at">topic_exposure =</span> <span class="fu">as.numeric</span>(exposure),</span>
-<span id="cb4-45"><a href=""></a>      <span class="at">topic_sentiment =</span> <span class="fu">as.numeric</span>(sentiment),</span>
-<span id="cb4-46"><a href=""></a>      <span class="at">topic_risk =</span> <span class="fu">as.numeric</span>(risk),</span>
-<span id="cb4-47"><a href=""></a>      </span>
-<span id="cb4-48"><a href=""></a>      <span class="co"># Create readable firm and country variables.</span></span>
-<span id="cb4-49"><a href=""></a>      <span class="at">firm =</span> <span class="fu">as.character</span>(company_name),</span>
-<span id="cb4-50"><a href=""></a>      <span class="at">country =</span> <span class="fu">as.character</span>(headquarterscountry),</span>
-<span id="cb4-51"><a href=""></a>      </span>
-<span id="cb4-52"><a href=""></a>      <span class="co"># Convert possible industry columns into text.</span></span>
-<span id="cb4-53"><a href=""></a>      <span class="at">trbc_text =</span> <span class="fu">as.character</span>(trbc),</span>
-<span id="cb4-54"><a href=""></a>      <span class="at">business_sector_text =</span> <span class="fu">as.character</span>(business_sector),</span>
-<span id="cb4-55"><a href=""></a>      <span class="at">economic_sector_text =</span> <span class="fu">as.character</span>(economic_sector),</span>
-<span id="cb4-56"><a href=""></a>      </span>
-<span id="cb4-57"><a href=""></a>      <span class="co"># Use the best available industry label.</span></span>
-<span id="cb4-58"><a href=""></a>      <span class="at">industry =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
-<span id="cb4-59"><a href=""></a>        <span class="sc">!</span><span class="fu">is.na</span>(business_sector_text) <span class="sc">&amp;</span> business_sector_text <span class="sc">!=</span> <span class="st">""</span> <span class="sc">~</span> business_sector_text,</span>
-<span id="cb4-60"><a href=""></a>        <span class="sc">!</span><span class="fu">is.na</span>(economic_sector_text) <span class="sc">&amp;</span> economic_sector_text <span class="sc">!=</span> <span class="st">""</span> <span class="sc">~</span> economic_sector_text,</span>
-<span id="cb4-61"><a href=""></a>        <span class="sc">!</span><span class="fu">is.na</span>(trbc_text) <span class="sc">&amp;</span> trbc_text <span class="sc">!=</span> <span class="st">""</span> <span class="sc">~</span> trbc_text,</span>
-<span id="cb4-62"><a href=""></a>        <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_character_</span></span>
-<span id="cb4-63"><a href=""></a>      )</span>
-<span id="cb4-64"><a href=""></a>    ) <span class="sc">%&gt;%</span></span>
-<span id="cb4-65"><a href=""></a>    <span class="fu">select</span>(</span>
-<span id="cb4-66"><a href=""></a>      topic, firm, country, industry,</span>
-<span id="cb4-67"><a href=""></a>      date_q, qtr_date, year, quarter, qtr,</span>
-<span id="cb4-68"><a href=""></a>      topic_exposure, topic_sentiment, topic_risk,</span>
-<span id="cb4-69"><a href=""></a>      <span class="fu">any_of</span>(<span class="fu">c</span>(<span class="st">"positive"</span>, <span class="st">"negative"</span>, <span class="st">"nr_of_sentences"</span>)),</span>
-<span id="cb4-70"><a href=""></a>      <span class="fu">everything</span>()</span>
-<span id="cb4-71"><a href=""></a>    )</span>
-<span id="cb4-72"><a href=""></a>  </span>
-<span id="cb4-73"><a href=""></a>  <span class="fu">return</span>(out)</span>
-<span id="cb4-74"><a href=""></a>}</span>
-<span id="cb4-75"><a href=""></a></span>
-<span id="cb4-76"><a href=""></a></span>
-<span id="cb4-77"><a href=""></a><span class="co"># This function formats dates as year plus Roman-numeral quarter.</span></span>
-<span id="cb4-78"><a href=""></a><span class="co"># Example: 2020 Q1 becomes 2020:I.</span></span>
-<span id="cb4-79"><a href=""></a>quarter_label <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
-<span id="cb4-80"><a href=""></a>  q <span class="ot">&lt;-</span> lubridate<span class="sc">::</span><span class="fu">quarter</span>(x)</span>
-<span id="cb4-81"><a href=""></a>  roman_q <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"I"</span>, <span class="st">"II"</span>, <span class="st">"III"</span>, <span class="st">"IV"</span>)[q]</span>
-<span id="cb4-82"><a href=""></a>  <span class="fu">paste0</span>(lubridate<span class="sc">::</span><span class="fu">year</span>(x), <span class="st">":"</span>, roman_q)</span>
-<span id="cb4-83"><a href=""></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb4-15"><a href=""></a>  exact_paths <span class="ot">&lt;-</span> exact_paths[<span class="fu">file.exists</span>(exact_paths)]</span>
+<span id="cb4-16"><a href=""></a>  </span>
+<span id="cb4-17"><a href=""></a>  <span class="cf">if</span> (<span class="fu">length</span>(exact_paths) <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb4-18"><a href=""></a>    file_path <span class="ot">&lt;-</span> exact_paths[<span class="dv">1</span>]</span>
+<span id="cb4-19"><a href=""></a>  } <span class="cf">else</span> {</span>
+<span id="cb4-20"><a href=""></a>    file_stem <span class="ot">&lt;-</span> tools<span class="sc">::</span><span class="fu">file_path_sans_ext</span>(file_name)</span>
+<span id="cb4-21"><a href=""></a>    loose_paths <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb4-22"><a href=""></a>      <span class="fu">Sys.glob</span>(<span class="fu">file.path</span>(nl_dir, <span class="fu">paste0</span>(file_stem, <span class="st">"*.csv"</span>))),</span>
+<span id="cb4-23"><a href=""></a>      <span class="fu">Sys.glob</span>(<span class="fu">file.path</span>(project_dir, <span class="fu">paste0</span>(file_stem, <span class="st">"*.csv"</span>))),</span>
+<span id="cb4-24"><a href=""></a>      <span class="fu">Sys.glob</span>(<span class="fu">file.path</span>(<span class="fu">getwd</span>(), <span class="fu">paste0</span>(file_stem, <span class="st">"*.csv"</span>)))</span>
+<span id="cb4-25"><a href=""></a>    )</span>
+<span id="cb4-26"><a href=""></a>    loose_paths <span class="ot">&lt;-</span> <span class="fu">unique</span>(loose_paths[<span class="fu">file.exists</span>(loose_paths)])</span>
+<span id="cb4-27"><a href=""></a>    </span>
+<span id="cb4-28"><a href=""></a>    <span class="cf">if</span> (<span class="fu">length</span>(loose_paths) <span class="sc">==</span> <span class="dv">0</span>) {</span>
+<span id="cb4-29"><a href=""></a>      <span class="cf">if</span> (required) {</span>
+<span id="cb4-30"><a href=""></a>        <span class="fu">stop</span>(<span class="st">"File not found: "</span>, file_name, <span class="st">" in "</span>, nl_dir, <span class="st">" or "</span>, project_dir)</span>
+<span id="cb4-31"><a href=""></a>      } <span class="cf">else</span> {</span>
+<span id="cb4-32"><a href=""></a>        <span class="fu">warning</span>(<span class="st">"Optional file not found: "</span>, file_name)</span>
+<span id="cb4-33"><a href=""></a>        <span class="fu">return</span>(<span class="cn">NULL</span>)</span>
+<span id="cb4-34"><a href=""></a>      }</span>
+<span id="cb4-35"><a href=""></a>    }</span>
+<span id="cb4-36"><a href=""></a>    file_path <span class="ot">&lt;-</span> loose_paths[<span class="dv">1</span>]</span>
+<span id="cb4-37"><a href=""></a>  }</span>
+<span id="cb4-38"><a href=""></a>  </span>
+<span id="cb4-39"><a href=""></a>  <span class="fu">message</span>(<span class="st">"Reading: "</span>, file_path)</span>
+<span id="cb4-40"><a href=""></a>  data <span class="ot">&lt;-</span> data.table<span class="sc">::</span><span class="fu">fread</span>(file_path)</span>
+<span id="cb4-41"><a href=""></a>  data <span class="ot">&lt;-</span> janitor<span class="sc">::</span><span class="fu">clean_names</span>(data)</span>
+<span id="cb4-42"><a href=""></a>  </span>
+<span id="cb4-43"><a href=""></a>  <span class="fu">return</span>(data)</span>
+<span id="cb4-44"><a href=""></a>}</span>
+<span id="cb4-45"><a href=""></a></span>
+<span id="cb4-46"><a href=""></a></span>
+<span id="cb4-47"><a href=""></a><span class="co"># This function standardizes each topic data file.</span></span>
+<span id="cb4-48"><a href=""></a><span class="co"># It creates common columns such as topic, year, quarter, firm, country, and industry.</span></span>
+<span id="cb4-49"><a href=""></a>clean_topic_file <span class="ot">&lt;-</span> <span class="cf">function</span>(df, topic_name) {</span>
+<span id="cb4-50"><a href=""></a>  </span>
+<span id="cb4-51"><a href=""></a>  df <span class="ot">&lt;-</span> janitor<span class="sc">::</span><span class="fu">clean_names</span>(df)</span>
+<span id="cb4-52"><a href=""></a>  </span>
+<span id="cb4-53"><a href=""></a>  <span class="cf">if</span> (<span class="st">"earningscall_id"</span> <span class="sc">%in%</span> <span class="fu">names</span>(df)) {</span>
+<span id="cb4-54"><a href=""></a>    df<span class="sc">$</span>earningscall_id <span class="ot">&lt;-</span> <span class="fu">as.character</span>(df<span class="sc">$</span>earningscall_id)</span>
+<span id="cb4-55"><a href=""></a>  }</span>
+<span id="cb4-56"><a href=""></a>  </span>
+<span id="cb4-57"><a href=""></a>  out <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span></span>
+<span id="cb4-58"><a href=""></a>    <span class="fu">mutate</span>(</span>
+<span id="cb4-59"><a href=""></a>      <span class="co"># Add topic name so each row can be identified after combining data.</span></span>
+<span id="cb4-60"><a href=""></a>      <span class="at">topic =</span> topic_name,</span>
+<span id="cb4-61"><a href=""></a>      </span>
+<span id="cb4-62"><a href=""></a>      <span class="co"># Convert quarterly date into Date format and extract year/quarter.</span></span>
+<span id="cb4-63"><a href=""></a>      <span class="at">date_q =</span> <span class="fu">as.Date</span>(date_q),</span>
+<span id="cb4-64"><a href=""></a>      <span class="at">year =</span> lubridate<span class="sc">::</span><span class="fu">year</span>(date_q),</span>
+<span id="cb4-65"><a href=""></a>      <span class="at">quarter =</span> lubridate<span class="sc">::</span><span class="fu">quarter</span>(date_q),</span>
+<span id="cb4-66"><a href=""></a>      <span class="at">qtr =</span> <span class="fu">paste0</span>(year, <span class="st">" Q"</span>, quarter),</span>
+<span id="cb4-67"><a href=""></a>      <span class="at">qtr_date =</span> date_q,</span>
+<span id="cb4-68"><a href=""></a>      </span>
+<span id="cb4-69"><a href=""></a>      <span class="co"># Convert main text measures into numeric form.</span></span>
+<span id="cb4-70"><a href=""></a>      <span class="at">topic_exposure =</span> <span class="fu">as.numeric</span>(exposure),</span>
+<span id="cb4-71"><a href=""></a>      <span class="at">topic_sentiment =</span> <span class="fu">as.numeric</span>(sentiment),</span>
+<span id="cb4-72"><a href=""></a>      <span class="at">topic_risk =</span> <span class="fu">as.numeric</span>(risk),</span>
+<span id="cb4-73"><a href=""></a>      </span>
+<span id="cb4-74"><a href=""></a>      <span class="co"># Create readable firm and country variables.</span></span>
+<span id="cb4-75"><a href=""></a>      <span class="at">firm =</span> <span class="fu">as.character</span>(company_name),</span>
+<span id="cb4-76"><a href=""></a>      <span class="at">country =</span> <span class="fu">as.character</span>(headquarterscountry),</span>
+<span id="cb4-77"><a href=""></a>      </span>
+<span id="cb4-78"><a href=""></a>      <span class="co"># Convert possible industry columns into text.</span></span>
+<span id="cb4-79"><a href=""></a>      <span class="at">trbc_text =</span> <span class="fu">as.character</span>(trbc),</span>
+<span id="cb4-80"><a href=""></a>      <span class="at">business_sector_text =</span> <span class="fu">as.character</span>(business_sector),</span>
+<span id="cb4-81"><a href=""></a>      <span class="at">economic_sector_text =</span> <span class="fu">as.character</span>(economic_sector),</span>
+<span id="cb4-82"><a href=""></a>      </span>
+<span id="cb4-83"><a href=""></a>      <span class="co"># Use the best available industry label.</span></span>
+<span id="cb4-84"><a href=""></a>      <span class="at">industry =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
+<span id="cb4-85"><a href=""></a>        <span class="sc">!</span><span class="fu">is.na</span>(business_sector_text) <span class="sc">&amp;</span> business_sector_text <span class="sc">!=</span> <span class="st">""</span> <span class="sc">~</span> business_sector_text,</span>
+<span id="cb4-86"><a href=""></a>        <span class="sc">!</span><span class="fu">is.na</span>(economic_sector_text) <span class="sc">&amp;</span> economic_sector_text <span class="sc">!=</span> <span class="st">""</span> <span class="sc">~</span> economic_sector_text,</span>
+<span id="cb4-87"><a href=""></a>        <span class="sc">!</span><span class="fu">is.na</span>(trbc_text) <span class="sc">&amp;</span> trbc_text <span class="sc">!=</span> <span class="st">""</span> <span class="sc">~</span> trbc_text,</span>
+<span id="cb4-88"><a href=""></a>        <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_character_</span></span>
+<span id="cb4-89"><a href=""></a>      )</span>
+<span id="cb4-90"><a href=""></a>    ) <span class="sc">%&gt;%</span></span>
+<span id="cb4-91"><a href=""></a>    <span class="fu">select</span>(</span>
+<span id="cb4-92"><a href=""></a>      topic, firm, country, industry,</span>
+<span id="cb4-93"><a href=""></a>      date_q, qtr_date, year, quarter, qtr,</span>
+<span id="cb4-94"><a href=""></a>      topic_exposure, topic_sentiment, topic_risk,</span>
+<span id="cb4-95"><a href=""></a>      <span class="fu">any_of</span>(<span class="fu">c</span>(<span class="st">"positive"</span>, <span class="st">"negative"</span>, <span class="st">"nr_of_sentences"</span>)),</span>
+<span id="cb4-96"><a href=""></a>      <span class="fu">everything</span>()</span>
+<span id="cb4-97"><a href=""></a>    )</span>
+<span id="cb4-98"><a href=""></a>  </span>
+<span id="cb4-99"><a href=""></a>  <span class="fu">return</span>(out)</span>
+<span id="cb4-100"><a href=""></a>}</span>
+<span id="cb4-101"><a href=""></a></span>
+<span id="cb4-102"><a href=""></a></span>
+<span id="cb4-103"><a href=""></a><span class="co"># This function formats dates as year plus Roman-numeral quarter.</span></span>
+<span id="cb4-104"><a href=""></a><span class="co"># Example: 2020 Q1 becomes 2020:I.</span></span>
+<span id="cb4-105"><a href=""></a>quarter_label <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
+<span id="cb4-106"><a href=""></a>  q <span class="ot">&lt;-</span> lubridate<span class="sc">::</span><span class="fu">quarter</span>(x)</span>
+<span id="cb4-107"><a href=""></a>  roman_q <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"I"</span>, <span class="st">"II"</span>, <span class="st">"III"</span>, <span class="st">"IV"</span>)[q]</span>
+<span id="cb4-108"><a href=""></a>  <span class="fu">paste0</span>(lubridate<span class="sc">::</span><span class="fu">year</span>(x), <span class="st">":"</span>, roman_q)</span>
+<span id="cb4-109"><a href=""></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>I defined helper functions to avoid repeating the same code many times and to make the data preparation process more structured. Since the project uses several topic CSV files from the <code>nl_analytics</code> folder, I created functions that can read, clean, and standardize each file in the same way.</p>
 <p>The first function, <code>read_topic_csv()</code>, reads one CSV file from the project folder. It creates the full file path, checks whether the file exists, and stops with a clear error message if the file is missing. I used <code>data.table::fread()</code> because it is faster than base R functions when reading larger CSV files. After importing the file, I used <code>janitor::clean_names()</code> to convert column names into a consistent format, such as changing <code>"Company Name"</code> into <code>company_name</code>. This makes the columns easier to use later in the code.</p>
@@ -533,38 +559,97 @@ Bhupender Singh
 <span id="cb5-2"><a href=""></a><span class="co"># 4. IMPORT ALL CSV FILES NEEDED FOR FIGURE 1 AND FIGURE 2</span></span>
 <span id="cb5-3"><a href=""></a><span class="co"># ============================================================</span></span>
 <span id="cb5-4"><a href=""></a></span>
-<span id="cb5-5"><a href=""></a><span class="co"># Import the topic-level data files.</span></span>
-<span id="cb5-6"><a href=""></a><span class="co"># These files are used to calculate exposure, risk, and sentiment measures.</span></span>
-<span id="cb5-7"><a href=""></a>brexit       <span class="ot">&lt;-</span> <span class="fu">read_topic_csv</span>(<span class="st">"brexit.csv"</span>)</span>
-<span id="cb5-8"><a href=""></a>covid        <span class="ot">&lt;-</span> <span class="fu">read_topic_csv</span>(<span class="st">"covid.csv"</span>)</span>
-<span id="cb5-9"><a href=""></a>inflation    <span class="ot">&lt;-</span> <span class="fu">read_topic_csv</span>(<span class="st">"inflation.csv"</span>)</span>
-<span id="cb5-10"><a href=""></a>ml_ai        <span class="ot">&lt;-</span> <span class="fu">read_topic_csv</span>(<span class="st">"ml_ai.csv"</span>)</span>
-<span id="cb5-11"><a href=""></a>ml_ai_uncond <span class="ot">&lt;-</span> <span class="fu">read_topic_csv</span>(<span class="st">"ml_ai_unconditional.csv"</span>)</span>
-<span id="cb5-12"><a href=""></a>russia       <span class="ot">&lt;-</span> <span class="fu">read_topic_csv</span>(<span class="st">"russia.csv"</span>)</span>
-<span id="cb5-13"><a href=""></a>russian_war  <span class="ot">&lt;-</span> <span class="fu">read_topic_csv</span>(<span class="st">"russian_war.csv"</span>)</span>
-<span id="cb5-14"><a href=""></a>supplychain  <span class="ot">&lt;-</span> <span class="fu">read_topic_csv</span>(<span class="st">"supplychain.csv"</span>)</span>
-<span id="cb5-15"><a href=""></a>trade        <span class="ot">&lt;-</span> <span class="fu">read_topic_csv</span>(<span class="st">"trade.csv"</span>)</span>
-<span id="cb5-16"><a href=""></a></span>
-<span id="cb5-17"><a href=""></a><span class="co"># Show a short message to confirm successful import.</span></span>
-<span id="cb5-18"><a href=""></a><span class="fu">message</span>(<span class="st">"All required CSV files were imported successfully."</span>)</span>
-<span id="cb5-19"><a href=""></a></span>
-<span id="cb5-20"><a href=""></a></span>
-<span id="cb5-21"><a href=""></a><span class="co"># ============================================================</span></span>
-<span id="cb5-22"><a href=""></a><span class="co"># 5. CLEAN AND STANDARDIZE TOPIC DATA</span></span>
-<span id="cb5-23"><a href=""></a><span class="co"># ============================================================</span></span>
-<span id="cb5-24"><a href=""></a></span>
-<span id="cb5-25"><a href=""></a><span class="co"># Apply the same cleaning function to each topic file.</span></span>
-<span id="cb5-26"><a href=""></a>ai_clean          <span class="ot">&lt;-</span> <span class="fu">clean_topic_file</span>(ml_ai, <span class="st">"AI"</span>)</span>
-<span id="cb5-27"><a href=""></a>brexit_clean      <span class="ot">&lt;-</span> <span class="fu">clean_topic_file</span>(brexit, <span class="st">"Brexit"</span>)</span>
-<span id="cb5-28"><a href=""></a>covid_clean       <span class="ot">&lt;-</span> <span class="fu">clean_topic_file</span>(covid, <span class="st">"Covid"</span>)</span>
-<span id="cb5-29"><a href=""></a>russia_clean      <span class="ot">&lt;-</span> <span class="fu">clean_topic_file</span>(russia, <span class="st">"Russia"</span>)</span>
-<span id="cb5-30"><a href=""></a>inflation_clean   <span class="ot">&lt;-</span> <span class="fu">clean_topic_file</span>(inflation, <span class="st">"Inflation"</span>)</span>
-<span id="cb5-31"><a href=""></a>supplychain_clean <span class="ot">&lt;-</span> <span class="fu">clean_topic_file</span>(supplychain, <span class="st">"Supply chain"</span>)</span>
-<span id="cb5-32"><a href=""></a>trade_clean       <span class="ot">&lt;-</span> <span class="fu">clean_topic_file</span>(trade, <span class="st">"Trade"</span>)</span>
-<span id="cb5-33"><a href=""></a></span>
-<span id="cb5-34"><a href=""></a><span class="co"># Check that dates were converted correctly.</span></span>
-<span id="cb5-35"><a href=""></a><span class="fu">message</span>(<span class="st">"Missing AI dates: "</span>, <span class="fu">sum</span>(<span class="fu">is.na</span>(ai_clean<span class="sc">$</span>qtr_date)))</span>
-<span id="cb5-36"><a href=""></a><span class="fu">message</span>(<span class="st">"Missing Brexit dates: "</span>, <span class="fu">sum</span>(<span class="fu">is.na</span>(brexit_clean<span class="sc">$</span>qtr_date)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb5-5"><a href=""></a><span class="co"># DATA USED FOR FIGURE 1 AND FIGURE 2</span></span>
+<span id="cb5-6"><a href=""></a><span class="co">#</span></span>
+<span id="cb5-7"><a href=""></a><span class="co"># Figure 1, Panel A: Overall risk</span></span>
+<span id="cb5-8"><a href=""></a><span class="co">#   Data files: ml_ai_unconditional.csv + ml_ai.csv</span></span>
+<span id="cb5-9"><a href=""></a><span class="co">#   Extraction: ml_ai_unconditional.csv gives unconditional risk sentence counts</span></span>
+<span id="cb5-10"><a href=""></a><span class="co">#               and nr_of_sentences. ml_ai.csv is used only as a date lookup</span></span>
+<span id="cb5-11"><a href=""></a><span class="co">#               through earningscall_id because the unconditional file does not</span></span>
+<span id="cb5-12"><a href=""></a><span class="co">#               contain date_q.</span></span>
+<span id="cb5-13"><a href=""></a><span class="co">#   Calculation: quarterly mean of</span></span>
+<span id="cb5-14"><a href=""></a><span class="co">#                100 * unconditional_risk_sentences_count / nr_of_sentences.</span></span>
+<span id="cb5-15"><a href=""></a><span class="co">#</span></span>
+<span id="cb5-16"><a href=""></a><span class="co"># Figure 1, Panel B: Brexit risk</span></span>
+<span id="cb5-17"><a href=""></a><span class="co">#   Data file: brexit.csv</span></span>
+<span id="cb5-18"><a href=""></a><span class="co">#   Extraction: date_q and risk from the Brexit topic file.</span></span>
+<span id="cb5-19"><a href=""></a><span class="co">#   Calculation: quarterly mean of topic risk, converted to percentage scale.</span></span>
+<span id="cb5-20"><a href=""></a><span class="co">#</span></span>
+<span id="cb5-21"><a href=""></a><span class="co"># Figure 2, Panel A: Sentiment by event</span></span>
+<span id="cb5-22"><a href=""></a><span class="co">#   Data files: ml_ai.csv, russia.csv, covid.csv, brexit.csv</span></span>
+<span id="cb5-23"><a href=""></a><span class="co">#   Extraction: event-year earnings calls with topic exposure &gt; 0.</span></span>
+<span id="cb5-24"><a href=""></a><span class="co">#   Calculation: original-study style average across earnings calls.</span></span>
+<span id="cb5-25"><a href=""></a><span class="co">#                For each affected call, calculate TopicSentiment / TopicExposure,</span></span>
+<span id="cb5-26"><a href=""></a><span class="co">#                then take the unweighted average across calls. Panel A is sorted</span></span>
+<span id="cb5-27"><a href=""></a><span class="co">#                in descending order by this calculated value so the highest</span></span>
+<span id="cb5-28"><a href=""></a><span class="co">#                sentiment appears at the top, matching the original Figure 2 layout.</span></span>
+<span id="cb5-29"><a href=""></a><span class="co">#</span></span>
+<span id="cb5-30"><a href=""></a><span class="co"># Figure 2, Panel B: AI sentiment by firm</span></span>
+<span id="cb5-31"><a href=""></a><span class="co">#   Data file: ml_ai.csv</span></span>
+<span id="cb5-32"><a href=""></a><span class="co">#   Extraction: selected firms in 2023.</span></span>
+<span id="cb5-33"><a href=""></a><span class="co">#   Calculation: mean(sentiment) * 100 by firm.</span></span>
+<span id="cb5-34"><a href=""></a><span class="co">#</span></span>
+<span id="cb5-35"><a href=""></a><span class="co"># Figure 2, Panel C: Russia sentiment by country</span></span>
+<span id="cb5-36"><a href=""></a><span class="co">#   Data file: russia.csv</span></span>
+<span id="cb5-37"><a href=""></a><span class="co">#   Extraction: selected headquarters countries in 2022.</span></span>
+<span id="cb5-38"><a href=""></a><span class="co">#   Calculation: mean(sentiment) * 100 by country.</span></span>
+<span id="cb5-39"><a href=""></a><span class="co">#</span></span>
+<span id="cb5-40"><a href=""></a><span class="co"># Figure 2, Panel D: Covid sentiment by industry</span></span>
+<span id="cb5-41"><a href=""></a><span class="co">#   Data files: covid.csv + ml_ai_gvkeys.csv</span></span>
+<span id="cb5-42"><a href=""></a><span class="co">#   Extraction: Covid calls in 2020, U.S.-headquartered firms only.</span></span>
+<span id="cb5-43"><a href=""></a><span class="co">#               ml_ai_gvkeys.csv supplies sic_compustat through earningscall_id.</span></span>
+<span id="cb5-44"><a href=""></a><span class="co">#   Calculation: convert sic_compustat to 3-digit SIC sector and calculate</span></span>
+<span id="cb5-45"><a href=""></a><span class="co">#                mean(sentiment) * 100 for the original SIC3 industry groups.</span></span>
+<span id="cb5-46"><a href=""></a></span>
+<span id="cb5-47"><a href=""></a><span class="co"># Import the topic-level data files.</span></span>
+<span id="cb5-48"><a href=""></a><span class="co"># These files are used to calculate exposure, risk, and sentiment measures.</span></span>
+<span id="cb5-49"><a href=""></a>brexit       <span class="ot">&lt;-</span> <span class="fu">read_topic_csv</span>(<span class="st">"brexit.csv"</span>)</span>
+<span id="cb5-50"><a href=""></a>covid        <span class="ot">&lt;-</span> <span class="fu">read_topic_csv</span>(<span class="st">"covid.csv"</span>)</span>
+<span id="cb5-51"><a href=""></a>inflation    <span class="ot">&lt;-</span> <span class="fu">read_topic_csv</span>(<span class="st">"inflation.csv"</span>)</span>
+<span id="cb5-52"><a href=""></a>ml_ai        <span class="ot">&lt;-</span> <span class="fu">read_topic_csv</span>(<span class="st">"ml_ai.csv"</span>)</span>
+<span id="cb5-53"><a href=""></a>ml_ai_uncond <span class="ot">&lt;-</span> <span class="fu">read_topic_csv</span>(<span class="st">"ml_ai_unconditional.csv"</span>, <span class="at">required =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb5-54"><a href=""></a>ml_ai_gvkeys <span class="ot">&lt;-</span> <span class="fu">read_topic_csv</span>(<span class="st">"ml_ai_gvkeys.csv"</span>)</span>
+<span id="cb5-55"><a href=""></a>russia       <span class="ot">&lt;-</span> <span class="fu">read_topic_csv</span>(<span class="st">"russia.csv"</span>)</span>
+<span id="cb5-56"><a href=""></a>russian_war  <span class="ot">&lt;-</span> <span class="fu">read_topic_csv</span>(<span class="st">"russian_war.csv"</span>, <span class="at">required =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb5-57"><a href=""></a>supplychain  <span class="ot">&lt;-</span> <span class="fu">read_topic_csv</span>(<span class="st">"supplychain.csv"</span>, <span class="at">required =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb5-58"><a href=""></a>trade        <span class="ot">&lt;-</span> <span class="fu">read_topic_csv</span>(<span class="st">"trade.csv"</span>)</span>
+<span id="cb5-59"><a href=""></a></span>
+<span id="cb5-60"><a href=""></a><span class="co"># Show a short message to confirm successful import.</span></span>
+<span id="cb5-61"><a href=""></a><span class="fu">message</span>(<span class="st">"All required CSV files were imported successfully."</span>)</span>
+<span id="cb5-62"><a href=""></a></span>
+<span id="cb5-63"><a href=""></a></span>
+<span id="cb5-64"><a href=""></a><span class="co"># ============================================================</span></span>
+<span id="cb5-65"><a href=""></a><span class="co"># 5. CLEAN AND STANDARDIZE TOPIC DATA</span></span>
+<span id="cb5-66"><a href=""></a><span class="co"># ============================================================</span></span>
+<span id="cb5-67"><a href=""></a></span>
+<span id="cb5-68"><a href=""></a><span class="co"># Apply the same cleaning function to each topic file.</span></span>
+<span id="cb5-69"><a href=""></a>ai_clean        <span class="ot">&lt;-</span> <span class="fu">clean_topic_file</span>(ml_ai, <span class="st">"AI"</span>)</span>
+<span id="cb5-70"><a href=""></a>brexit_clean    <span class="ot">&lt;-</span> <span class="fu">clean_topic_file</span>(brexit, <span class="st">"Brexit"</span>)</span>
+<span id="cb5-71"><a href=""></a>covid_clean     <span class="ot">&lt;-</span> <span class="fu">clean_topic_file</span>(covid, <span class="st">"Covid"</span>)</span>
+<span id="cb5-72"><a href=""></a>russia_clean    <span class="ot">&lt;-</span> <span class="fu">clean_topic_file</span>(russia, <span class="st">"Russia"</span>)</span>
+<span id="cb5-73"><a href=""></a>inflation_clean <span class="ot">&lt;-</span> <span class="fu">clean_topic_file</span>(inflation, <span class="st">"Inflation"</span>)</span>
+<span id="cb5-74"><a href=""></a>trade_clean     <span class="ot">&lt;-</span> <span class="fu">clean_topic_file</span>(trade, <span class="st">"Trade"</span>)</span>
+<span id="cb5-75"><a href=""></a></span>
+<span id="cb5-76"><a href=""></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(russian_war)) {</span>
+<span id="cb5-77"><a href=""></a>  russian_war_clean <span class="ot">&lt;-</span> <span class="fu">clean_topic_file</span>(russian_war, <span class="st">"Russia War"</span>)</span>
+<span id="cb5-78"><a href=""></a>}</span>
+<span id="cb5-79"><a href=""></a></span>
+<span id="cb5-80"><a href=""></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(supplychain)) {</span>
+<span id="cb5-81"><a href=""></a>  supplychain_clean <span class="ot">&lt;-</span> <span class="fu">clean_topic_file</span>(supplychain, <span class="st">"Supply chain"</span>)</span>
+<span id="cb5-82"><a href=""></a>}</span>
+<span id="cb5-83"><a href=""></a></span>
+<span id="cb5-84"><a href=""></a>gvkeys_sic <span class="ot">&lt;-</span> ml_ai_gvkeys <span class="sc">%&gt;%</span></span>
+<span id="cb5-85"><a href=""></a>  janitor<span class="sc">::</span><span class="fu">clean_names</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb5-86"><a href=""></a>  dplyr<span class="sc">::</span><span class="fu">transmute</span>(</span>
+<span id="cb5-87"><a href=""></a>    <span class="at">earningscall_id =</span> <span class="fu">as.character</span>(earningscall_id),</span>
+<span id="cb5-88"><a href=""></a>    <span class="at">sic_compustat =</span> <span class="fu">as.integer</span>(sic_compustat)</span>
+<span id="cb5-89"><a href=""></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb5-90"><a href=""></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(earningscall_id), <span class="sc">!</span><span class="fu">is.na</span>(sic_compustat)) <span class="sc">%&gt;%</span></span>
+<span id="cb5-91"><a href=""></a>  dplyr<span class="sc">::</span><span class="fu">distinct</span>(earningscall_id, <span class="at">.keep_all =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb5-92"><a href=""></a></span>
+<span id="cb5-93"><a href=""></a><span class="co"># Check that dates were converted correctly.</span></span>
+<span id="cb5-94"><a href=""></a><span class="fu">message</span>(<span class="st">"Missing AI dates: "</span>, <span class="fu">sum</span>(<span class="fu">is.na</span>(ai_clean<span class="sc">$</span>qtr_date)))</span>
+<span id="cb5-95"><a href=""></a><span class="fu">message</span>(<span class="st">"Missing Brexit dates: "</span>, <span class="fu">sum</span>(<span class="fu">is.na</span>(brexit_clean<span class="sc">$</span>qtr_date)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>After setting the folders, I imported all CSV files needed for Figure 1 and Figure 2. These files contain the topic-level measures for AI, Brexit, covid, inflation, Russia, supply chain, and trade. Then, I applied the same cleaning function to each file so that all data sets have consistent column names, date variables, topic labels, and numerical measures. This makes the data sets ready to be combined and used for the final analysis and visualizations.</p>
 </section>
@@ -862,7 +947,7 @@ Bhupender Singh
 
 <h5 id="figure-1-panel-a-overall-risk">Figure 1, Panel A: Overall Risk</h5>
 
-<img data-src="images/figure1_panel_a_overall_risk.png" class="r-stretch quarto-figure quarto-figure-center"><p>This panel shows the average overall risk discussed in corporate earnings calls over time. The y-axis measures the percentage of sentences that contain risk or uncertainty-related terms. The line increases during major crisis periods, including the global financial crisis, the European debt crisis, and the Covid-19 pandemic. This shows that firms discuss risk more frequently when economic uncertainty rises.</p>
+<img data-src="images/figure1_panel_a_overall_risk-01.png" class="r-stretch quarto-figure quarto-figure-center"><p>This panel shows the average overall risk discussed in corporate earnings calls over time. The y-axis measures the percentage of sentences that contain risk or uncertainty-related terms. The line increases during major crisis periods, including the global financial crisis, the European debt crisis, and the Covid-19 pandemic. This shows that firms discuss risk more frequently when economic uncertainty rises.</p>
 </section>
 <section class="slide level2">
 
@@ -994,7 +1079,7 @@ Bhupender Singh
 
 <h5 id="figure-1-panel-b-brexit-risk">Figure 1, Panel B: Brexit Risk</h5>
 
-<img data-src="images/figure1_panel_b_brexit_risk.png" class="r-stretch quarto-figure quarto-figure-center"><p>This panel focuses specifically on Brexit-related risk. It measures the percentage of earnings-call sentences that mention both Brexit and risk-related language. The sharp increase after the 2016 Brexit referendum shows that firms became more concerned about the economic and policy uncertainty caused by the United Kingdom’s decision to leave the European Union. Later increases reflect continued uncertainty around the Brexit agreement and the possibility of a no-deal Brexit.</p>
+<img data-src="images/figure1_panel_b_brexit_risk-01.png" class="r-stretch quarto-figure quarto-figure-center"><p>This panel focuses specifically on Brexit-related risk. It measures the percentage of earnings-call sentences that mention both Brexit and risk-related language. The sharp increase after the 2016 Brexit referendum shows that firms became more concerned about the economic and policy uncertainty caused by the United Kingdom’s decision to leave the European Union. Later increases reflect continued uncertainty around the Brexit agreement and the possibility of a no-deal Brexit.</p>
 </section>
 <section class="slide level2">
 
@@ -1032,332 +1117,383 @@ Bhupender Singh
 <span id="cb9-30"><a href=""></a><span class="co"># 13. CREATE FIGURE 2, PANEL A: SENTIMENT BY EVENT</span></span>
 <span id="cb9-31"><a href=""></a><span class="co"># ============================================================</span></span>
 <span id="cb9-32"><a href=""></a></span>
-<span id="cb9-33"><a href=""></a><span class="co"># Figure 2, Panel A reports topic sentiment divided by topic exposure.</span></span>
-<span id="cb9-34"><a href=""></a><span class="co"># The paper explains that AI is positive, while Russia, Covid, and Brexit are negative.</span></span>
-<span id="cb9-35"><a href=""></a><span class="co"># The AI value is about +0.32 because 42.1% of AI-related sentences are positive</span></span>
-<span id="cb9-36"><a href=""></a><span class="co"># and 10.2% are negative, giving a net value of about +0.32.</span></span>
-<span id="cb9-37"><a href=""></a></span>
-<span id="cb9-38"><a href=""></a><span class="co"># ------------------------------------------------------------</span></span>
-<span id="cb9-39"><a href=""></a><span class="co"># Step 1: Prepare the correct Russia event data.</span></span>
-<span id="cb9-40"><a href=""></a><span class="co"># ------------------------------------------------------------</span></span>
-<span id="cb9-41"><a href=""></a><span class="co"># Your folder contains both russia.csv and russian_war.csv.</span></span>
-<span id="cb9-42"><a href=""></a><span class="co"># For Panel A, the event is Russia's 2022 invasion/war shock, so we use</span></span>
-<span id="cb9-43"><a href=""></a><span class="co"># russian_war.csv when it is available. If it is not available, the code falls</span></span>
-<span id="cb9-44"><a href=""></a><span class="co"># back to russia_clean so the script still runs.</span></span>
-<span id="cb9-45"><a href=""></a><span class="cf">if</span> (<span class="fu">exists</span>(<span class="st">"russian_war"</span>)) {</span>
-<span id="cb9-46"><a href=""></a>  russian_war_clean <span class="ot">&lt;-</span> <span class="fu">clean_topic_file</span>(russian_war, <span class="st">"Russia (2022)"</span>)</span>
-<span id="cb9-47"><a href=""></a>  russia_event_data <span class="ot">&lt;-</span> russian_war_clean</span>
-<span id="cb9-48"><a href=""></a>} <span class="cf">else</span> {</span>
-<span id="cb9-49"><a href=""></a>  russia_event_data <span class="ot">&lt;-</span> russia_clean</span>
-<span id="cb9-50"><a href=""></a>}</span>
-<span id="cb9-51"><a href=""></a></span>
-<span id="cb9-52"><a href=""></a><span class="co"># ------------------------------------------------------------</span></span>
-<span id="cb9-53"><a href=""></a><span class="co"># Step 2: Define a helper function for Panel A.</span></span>
-<span id="cb9-54"><a href=""></a><span class="co"># ------------------------------------------------------------</span></span>
-<span id="cb9-55"><a href=""></a><span class="co"># This function calculates:</span></span>
-<span id="cb9-56"><a href=""></a><span class="co"># topic sentiment / topic exposure</span></span>
-<span id="cb9-57"><a href=""></a><span class="co">#</span></span>
-<span id="cb9-58"><a href=""></a><span class="co"># If the number of sentences is available, the calculation is weighted by</span></span>
-<span id="cb9-59"><a href=""></a><span class="co"># nr_of_sentences. This is more accurate than taking a simple average because</span></span>
-<span id="cb9-60"><a href=""></a><span class="co"># earnings calls with more sentences contribute more text to the aggregate figure.</span></span>
-<span id="cb9-61"><a href=""></a>make_panel_a_row <span class="ot">&lt;-</span> <span class="cf">function</span>(data, event_name, event_year) {</span>
-<span id="cb9-62"><a href=""></a>  temp <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span></span>
-<span id="cb9-63"><a href=""></a>    <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb9-64"><a href=""></a>    dplyr<span class="sc">::</span><span class="fu">filter</span>(</span>
-<span id="cb9-65"><a href=""></a>      year <span class="sc">==</span> event_year,</span>
-<span id="cb9-66"><a href=""></a>      <span class="sc">!</span><span class="fu">is.na</span>(topic_sentiment),</span>
-<span id="cb9-67"><a href=""></a>      <span class="sc">!</span><span class="fu">is.na</span>(topic_exposure),</span>
-<span id="cb9-68"><a href=""></a>      topic_exposure <span class="sc">!=</span> <span class="dv">0</span></span>
-<span id="cb9-69"><a href=""></a>    )</span>
-<span id="cb9-70"><a href=""></a>  </span>
-<span id="cb9-71"><a href=""></a>  <span class="co"># Stop early with a clear message if the event-year data are missing.</span></span>
-<span id="cb9-72"><a href=""></a>  <span class="cf">if</span> (<span class="fu">nrow</span>(temp) <span class="sc">==</span> <span class="dv">0</span>) {</span>
-<span id="cb9-73"><a href=""></a>    <span class="fu">stop</span>(<span class="st">"No usable data found for "</span>, event_name, <span class="st">". Check the data file and year filter."</span>)</span>
-<span id="cb9-74"><a href=""></a>  }</span>
-<span id="cb9-75"><a href=""></a>  </span>
-<span id="cb9-76"><a href=""></a>  <span class="co"># Use sentence-weighted aggregation when nr_of_sentences is available.</span></span>
-<span id="cb9-77"><a href=""></a>  <span class="cf">if</span> (<span class="st">"nr_of_sentences"</span> <span class="sc">%in%</span> <span class="fu">names</span>(temp)) {</span>
-<span id="cb9-78"><a href=""></a>    temp <span class="ot">&lt;-</span> temp <span class="sc">%&gt;%</span></span>
-<span id="cb9-79"><a href=""></a>      dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">nr_of_sentences =</span> <span class="fu">as.numeric</span>(nr_of_sentences)) <span class="sc">%&gt;%</span></span>
-<span id="cb9-80"><a href=""></a>      dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(nr_of_sentences), nr_of_sentences <span class="sc">&gt;</span> <span class="dv">0</span>)</span>
-<span id="cb9-81"><a href=""></a>    </span>
-<span id="cb9-82"><a href=""></a>    sentiment_value <span class="ot">&lt;-</span> <span class="fu">sum</span>(temp<span class="sc">$</span>topic_sentiment <span class="sc">*</span> temp<span class="sc">$</span>nr_of_sentences, <span class="at">na.rm =</span> <span class="cn">TRUE</span>) <span class="sc">/</span></span>
-<span id="cb9-83"><a href=""></a>      <span class="fu">sum</span>(temp<span class="sc">$</span>topic_exposure <span class="sc">*</span> temp<span class="sc">$</span>nr_of_sentences, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb9-84"><a href=""></a>  } <span class="cf">else</span> {</span>
-<span id="cb9-85"><a href=""></a>    sentiment_value <span class="ot">&lt;-</span> <span class="fu">sum</span>(temp<span class="sc">$</span>topic_sentiment, <span class="at">na.rm =</span> <span class="cn">TRUE</span>) <span class="sc">/</span></span>
-<span id="cb9-86"><a href=""></a>      <span class="fu">sum</span>(temp<span class="sc">$</span>topic_exposure, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb9-87"><a href=""></a>  }</span>
-<span id="cb9-88"><a href=""></a>  </span>
-<span id="cb9-89"><a href=""></a>  tibble<span class="sc">::</span><span class="fu">tibble</span>(</span>
-<span id="cb9-90"><a href=""></a>    <span class="at">event =</span> event_name,</span>
-<span id="cb9-91"><a href=""></a>    <span class="at">sentiment_over_exposure =</span> sentiment_value</span>
-<span id="cb9-92"><a href=""></a>  )</span>
-<span id="cb9-93"><a href=""></a>}</span>
-<span id="cb9-94"><a href=""></a></span>
-<span id="cb9-95"><a href=""></a><span class="co"># ------------------------------------------------------------</span></span>
-<span id="cb9-96"><a href=""></a><span class="co"># Step 3: Calculate Panel A from the available data.</span></span>
-<span id="cb9-97"><a href=""></a><span class="co"># ------------------------------------------------------------</span></span>
-<span id="cb9-98"><a href=""></a>fig2a_data_based <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">bind_rows</span>(</span>
-<span id="cb9-99"><a href=""></a>  <span class="fu">make_panel_a_row</span>(ai_clean,           <span class="st">"AI (2023)"</span>,     <span class="dv">2023</span>),</span>
-<span id="cb9-100"><a href=""></a>  <span class="fu">make_panel_a_row</span>(russia_event_data,  <span class="st">"Russia (2022)"</span>, <span class="dv">2022</span>),</span>
-<span id="cb9-101"><a href=""></a>  <span class="fu">make_panel_a_row</span>(covid_clean,        <span class="st">"Covid (2020)"</span>,  <span class="dv">2020</span>),</span>
-<span id="cb9-102"><a href=""></a>  <span class="fu">make_panel_a_row</span>(brexit_clean,       <span class="st">"Brexit (2016)"</span>, <span class="dv">2016</span>)</span>
-<span id="cb9-103"><a href=""></a>)</span>
-<span id="cb9-104"><a href=""></a></span>
-<span id="cb9-105"><a href=""></a><span class="co"># ------------------------------------------------------------</span></span>
-<span id="cb9-106"><a href=""></a><span class="co"># Step 4: Use paper-calibrated values for visual replication.</span></span>
-<span id="cb9-107"><a href=""></a><span class="co"># ------------------------------------------------------------</span></span>
-<span id="cb9-108"><a href=""></a><span class="co"># Set this to FALSE if you want to show only the values calculated from your</span></span>
-<span id="cb9-109"><a href=""></a><span class="co"># local CSV files. Keep it TRUE when your goal is to visually replicate the</span></span>
-<span id="cb9-110"><a href=""></a><span class="co"># published Figure 2, Panel A.</span></span>
-<span id="cb9-111"><a href=""></a>use_paper_panel_a_values <span class="ot">&lt;-</span> <span class="cn">TRUE</span></span>
-<span id="cb9-112"><a href=""></a></span>
-<span id="cb9-113"><a href=""></a><span class="cf">if</span> (use_paper_panel_a_values) {</span>
-<span id="cb9-114"><a href=""></a>  fig2a <span class="ot">&lt;-</span> tibble<span class="sc">::</span><span class="fu">tibble</span>(</span>
-<span id="cb9-115"><a href=""></a>    <span class="at">event =</span> <span class="fu">c</span>(<span class="st">"AI (2023)"</span>, <span class="st">"Russia (2022)"</span>, <span class="st">"Covid (2020)"</span>, <span class="st">"Brexit (2016)"</span>),</span>
-<span id="cb9-116"><a href=""></a>    <span class="at">sentiment_over_exposure =</span> <span class="fu">c</span>(</span>
-<span id="cb9-117"><a href=""></a>      <span class="fl">0.32</span>,   <span class="co"># AI: positive net sentiment from the paper text.</span></span>
-<span id="cb9-118"><a href=""></a>      <span class="sc">-</span><span class="fl">0.10</span>,   <span class="co"># Russia: small negative bar in the original Panel A.</span></span>
-<span id="cb9-119"><a href=""></a>      <span class="sc">-</span><span class="fl">0.13</span>,   <span class="co"># Covid: negative bar, slightly larger than Russia.</span></span>
-<span id="cb9-120"><a href=""></a>      <span class="sc">-</span><span class="fl">0.30</span>    <span class="co"># Brexit: largest negative bar in the original Panel A.</span></span>
-<span id="cb9-121"><a href=""></a>    )</span>
-<span id="cb9-122"><a href=""></a>  )</span>
-<span id="cb9-123"><a href=""></a>} <span class="cf">else</span> {</span>
-<span id="cb9-124"><a href=""></a>  fig2a <span class="ot">&lt;-</span> fig2a_data_based</span>
-<span id="cb9-125"><a href=""></a>}</span>
-<span id="cb9-126"><a href=""></a></span>
-<span id="cb9-127"><a href=""></a><span class="co"># Order the bars so they match the original figure from top to bottom.</span></span>
-<span id="cb9-128"><a href=""></a>fig2a <span class="ot">&lt;-</span> fig2a <span class="sc">%&gt;%</span></span>
-<span id="cb9-129"><a href=""></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
-<span id="cb9-130"><a href=""></a>    <span class="at">event =</span> <span class="fu">factor</span>(</span>
-<span id="cb9-131"><a href=""></a>      event,</span>
-<span id="cb9-132"><a href=""></a>      <span class="at">levels =</span> <span class="fu">rev</span>(<span class="fu">c</span>(<span class="st">"AI (2023)"</span>, <span class="st">"Russia (2022)"</span>, <span class="st">"Covid (2020)"</span>, <span class="st">"Brexit (2016)"</span>))</span>
-<span id="cb9-133"><a href=""></a>    )</span>
-<span id="cb9-134"><a href=""></a>  )</span>
-<span id="cb9-135"><a href=""></a></span>
-<span id="cb9-136"><a href=""></a><span class="co"># Print the calculated values in the Console so you can check them.</span></span>
-<span id="cb9-137"><a href=""></a><span class="fu">print</span>(fig2a)</span>
-<span id="cb9-138"><a href=""></a></span>
-<span id="cb9-139"><a href=""></a><span class="co"># ------------------------------------------------------------</span></span>
-<span id="cb9-140"><a href=""></a><span class="co"># Step 5: Create horizontal bar chart for event sentiment.</span></span>
-<span id="cb9-141"><a href=""></a><span class="co"># ------------------------------------------------------------</span></span>
-<span id="cb9-142"><a href=""></a>p2a <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(fig2a, <span class="fu">aes</span>(<span class="at">x =</span> sentiment_over_exposure, <span class="at">y =</span> event, <span class="at">fill =</span> sentiment_over_exposure <span class="sc">&gt;</span> <span class="dv">0</span>)) <span class="sc">+</span></span>
-<span id="cb9-143"><a href=""></a>  <span class="fu">geom_col</span>(<span class="at">width =</span> <span class="fl">0.65</span>, <span class="at">show.legend =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
-<span id="cb9-144"><a href=""></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="dv">0</span>, <span class="at">linewidth =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
-<span id="cb9-145"><a href=""></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"TRUE"</span> <span class="ot">=</span> pos_col, <span class="st">"FALSE"</span> <span class="ot">=</span> neg_col)) <span class="sc">+</span></span>
-<span id="cb9-146"><a href=""></a>  <span class="fu">scale_x_continuous</span>(</span>
-<span id="cb9-147"><a href=""></a>    <span class="at">limits =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.4</span>, <span class="fl">0.4</span>),</span>
-<span id="cb9-148"><a href=""></a>    <span class="at">breaks =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.4</span>, <span class="sc">-</span><span class="fl">0.2</span>, <span class="dv">0</span>, <span class="fl">0.2</span>, <span class="fl">0.4</span>)</span>
-<span id="cb9-149"><a href=""></a>  ) <span class="sc">+</span></span>
-<span id="cb9-150"><a href=""></a>  <span class="fu">labs</span>(</span>
-<span id="cb9-151"><a href=""></a>    <span class="at">title =</span> <span class="st">"Panel A. Sentiment by event"</span>,</span>
-<span id="cb9-152"><a href=""></a>    <span class="at">x =</span> <span class="st">"Topic sentiment / topic exposure"</span>,</span>
-<span id="cb9-153"><a href=""></a>    <span class="at">y =</span> <span class="cn">NULL</span></span>
-<span id="cb9-154"><a href=""></a>  ) <span class="sc">+</span></span>
-<span id="cb9-155"><a href=""></a>  panel_theme</span>
-<span id="cb9-156"><a href=""></a><span class="co"># ============================================================</span></span>
-<span id="cb9-157"><a href=""></a><span class="co"># 14. CREATE FIGURE 2, PANEL B: AI SENTIMENT BY FIRM</span></span>
-<span id="cb9-158"><a href=""></a><span class="co"># ============================================================</span></span>
-<span id="cb9-159"><a href=""></a></span>
-<span id="cb9-160"><a href=""></a><span class="co"># Keep only selected firms that appear in the original style of Panel B.</span></span>
-<span id="cb9-161"><a href=""></a>fig2b <span class="ot">&lt;-</span> ai_clean <span class="sc">%&gt;%</span></span>
-<span id="cb9-162"><a href=""></a>  <span class="fu">filter</span>(year <span class="sc">==</span> <span class="dv">2023</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb9-163"><a href=""></a>  <span class="fu">mutate</span>(</span>
-<span id="cb9-164"><a href=""></a>    <span class="at">firm_label =</span> <span class="fu">case_when</span>(</span>
-<span id="cb9-165"><a href=""></a>      <span class="fu">str_detect</span>(firm, <span class="fu">regex</span>(<span class="st">"Alphabet"</span>, <span class="at">ignore_case =</span> <span class="cn">TRUE</span>)) <span class="sc">~</span> <span class="st">"Alphabet Inc."</span>,</span>
-<span id="cb9-166"><a href=""></a>      <span class="fu">str_detect</span>(firm, <span class="fu">regex</span>(<span class="st">"NVIDIA"</span>, <span class="at">ignore_case =</span> <span class="cn">TRUE</span>)) <span class="sc">~</span> <span class="st">"NVIDIA Corp."</span>,</span>
-<span id="cb9-167"><a href=""></a>      <span class="fu">str_detect</span>(firm, <span class="fu">regex</span>(<span class="st">"Microsoft"</span>, <span class="at">ignore_case =</span> <span class="cn">TRUE</span>)) <span class="sc">~</span> <span class="st">"Microsoft Corp."</span>,</span>
-<span id="cb9-168"><a href=""></a>      <span class="fu">str_detect</span>(firm, <span class="fu">regex</span>(<span class="st">"Warner Music"</span>, <span class="at">ignore_case =</span> <span class="cn">TRUE</span>)) <span class="sc">~</span> <span class="st">"Warner Music</span><span class="sc">\n</span><span class="st">Group Corp."</span>,</span>
-<span id="cb9-169"><a href=""></a>      <span class="fu">str_detect</span>(firm, <span class="fu">regex</span>(<span class="st">"^News Corp"</span>, <span class="at">ignore_case =</span> <span class="cn">TRUE</span>)) <span class="sc">~</span> <span class="st">"News Corp."</span>,</span>
-<span id="cb9-170"><a href=""></a>      <span class="fu">str_detect</span>(firm, <span class="fu">regex</span>(<span class="st">"Universal Music"</span>, <span class="at">ignore_case =</span> <span class="cn">TRUE</span>)) <span class="sc">~</span> <span class="st">"Universal Music</span><span class="sc">\n</span><span class="st">Group NV"</span>,</span>
-<span id="cb9-171"><a href=""></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_character_</span></span>
-<span id="cb9-172"><a href=""></a>    )</span>
-<span id="cb9-173"><a href=""></a>  ) <span class="sc">%&gt;%</span></span>
-<span id="cb9-174"><a href=""></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(firm_label)) <span class="sc">%&gt;%</span></span>
-<span id="cb9-175"><a href=""></a>  <span class="fu">group_by</span>(firm_label) <span class="sc">%&gt;%</span></span>
-<span id="cb9-176"><a href=""></a>  <span class="fu">summarise</span>(</span>
-<span id="cb9-177"><a href=""></a>    <span class="co"># Convert sentiment to percentage scale.</span></span>
-<span id="cb9-178"><a href=""></a>    <span class="at">ai_sentiment =</span> <span class="fu">mean</span>(topic_sentiment, <span class="at">na.rm =</span> <span class="cn">TRUE</span>) <span class="sc">*</span> <span class="dv">100</span>,</span>
-<span id="cb9-179"><a href=""></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
-<span id="cb9-180"><a href=""></a>  ) <span class="sc">%&gt;%</span></span>
-<span id="cb9-181"><a href=""></a>  <span class="fu">mutate</span>(</span>
-<span id="cb9-182"><a href=""></a>    <span class="at">firm_label =</span> <span class="fu">factor</span>(</span>
-<span id="cb9-183"><a href=""></a>      firm_label,</span>
-<span id="cb9-184"><a href=""></a>      <span class="at">levels =</span> <span class="fu">rev</span>(<span class="fu">c</span>(</span>
-<span id="cb9-185"><a href=""></a>        <span class="st">"Alphabet Inc."</span>,</span>
-<span id="cb9-186"><a href=""></a>        <span class="st">"NVIDIA Corp."</span>,</span>
-<span id="cb9-187"><a href=""></a>        <span class="st">"Microsoft Corp."</span>,</span>
-<span id="cb9-188"><a href=""></a>        <span class="st">"Warner Music</span><span class="sc">\n</span><span class="st">Group Corp."</span>,</span>
-<span id="cb9-189"><a href=""></a>        <span class="st">"News Corp."</span>,</span>
-<span id="cb9-190"><a href=""></a>        <span class="st">"Universal Music</span><span class="sc">\n</span><span class="st">Group NV"</span></span>
-<span id="cb9-191"><a href=""></a>      ))</span>
-<span id="cb9-192"><a href=""></a>    )</span>
-<span id="cb9-193"><a href=""></a>  )</span>
-<span id="cb9-194"><a href=""></a></span>
-<span id="cb9-195"><a href=""></a><span class="co"># Create horizontal bar chart for AI sentiment by firm.</span></span>
-<span id="cb9-196"><a href=""></a>p2b <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(fig2b, <span class="fu">aes</span>(<span class="at">x =</span> ai_sentiment, <span class="at">y =</span> firm_label, <span class="at">fill =</span> ai_sentiment <span class="sc">&gt;</span> <span class="dv">0</span>)) <span class="sc">+</span></span>
-<span id="cb9-197"><a href=""></a>  <span class="fu">geom_col</span>(<span class="at">width =</span> <span class="fl">0.65</span>, <span class="at">show.legend =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
-<span id="cb9-198"><a href=""></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="dv">0</span>, <span class="at">linewidth =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
-<span id="cb9-199"><a href=""></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"TRUE"</span> <span class="ot">=</span> pos_col, <span class="st">"FALSE"</span> <span class="ot">=</span> neg_col)) <span class="sc">+</span></span>
-<span id="cb9-200"><a href=""></a>  <span class="fu">scale_x_continuous</span>(</span>
-<span id="cb9-201"><a href=""></a>    <span class="at">limits =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">2</span>, <span class="fl">6.5</span>),</span>
-<span id="cb9-202"><a href=""></a>    <span class="at">breaks =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">2</span>, <span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">6</span>)</span>
-<span id="cb9-203"><a href=""></a>  ) <span class="sc">+</span></span>
-<span id="cb9-204"><a href=""></a>  <span class="fu">labs</span>(</span>
-<span id="cb9-205"><a href=""></a>    <span class="at">title =</span> <span class="st">"Panel B. AI (2023) sentiment by firm"</span>,</span>
-<span id="cb9-206"><a href=""></a>    <span class="at">x =</span> <span class="st">"AI net sentiment in 2023"</span>,</span>
-<span id="cb9-207"><a href=""></a>    <span class="at">y =</span> <span class="cn">NULL</span></span>
-<span id="cb9-208"><a href=""></a>  ) <span class="sc">+</span></span>
-<span id="cb9-209"><a href=""></a>  panel_theme</span>
-<span id="cb9-210"><a href=""></a><span class="co"># ============================================================</span></span>
-<span id="cb9-211"><a href=""></a><span class="co"># 15. CREATE FIGURE 2, PANEL C: RUSSIA SENTIMENT BY COUNTRY</span></span>
-<span id="cb9-212"><a href=""></a><span class="co"># ============================================================</span></span>
-<span id="cb9-213"><a href=""></a></span>
-<span id="cb9-214"><a href=""></a><span class="co"># Define the countries shown in Panel C.</span></span>
-<span id="cb9-215"><a href=""></a>country_order <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
-<span id="cb9-216"><a href=""></a>  <span class="st">"India"</span>,</span>
-<span id="cb9-217"><a href=""></a>  <span class="st">"United States"</span>,</span>
-<span id="cb9-218"><a href=""></a>  <span class="st">"Norway"</span>,</span>
-<span id="cb9-219"><a href=""></a>  <span class="st">"China"</span>,</span>
-<span id="cb9-220"><a href=""></a>  <span class="st">"United Kingdom"</span>,</span>
-<span id="cb9-221"><a href=""></a>  <span class="st">"Japan"</span>,</span>
-<span id="cb9-222"><a href=""></a>  <span class="st">"South Korea"</span>,</span>
-<span id="cb9-223"><a href=""></a>  <span class="st">"Denmark"</span>,</span>
-<span id="cb9-224"><a href=""></a>  <span class="st">"Germany"</span>,</span>
-<span id="cb9-225"><a href=""></a>  <span class="st">"Finland"</span></span>
-<span id="cb9-226"><a href=""></a>)</span>
+<span id="cb9-33"><a href=""></a><span class="co"># IMPORTANT FIX FOR PANEL A</span></span>
+<span id="cb9-34"><a href=""></a><span class="co"># This version recalculates Panel A using the original-study aggregation rule:</span></span>
+<span id="cb9-35"><a href=""></a><span class="co"># take an unweighted average across earnings calls of the call-level</span></span>
+<span id="cb9-36"><a href=""></a><span class="co"># topic-specific sentiment measure.</span></span>
+<span id="cb9-37"><a href=""></a><span class="co">#</span></span>
+<span id="cb9-38"><a href=""></a><span class="co"># The plotted call-level measure is:</span></span>
+<span id="cb9-39"><a href=""></a><span class="co">#   TopicSentiment / TopicExposure</span></span>
+<span id="cb9-40"><a href=""></a><span class="co"># for calls in the event year where TopicExposure &gt; 0.</span></span>
+<span id="cb9-41"><a href=""></a><span class="co">#</span></span>
+<span id="cb9-42"><a href=""></a><span class="co"># This is intentionally NOT sentence-weighted, exposure-weighted, or calculated</span></span>
+<span id="cb9-43"><a href=""></a><span class="co"># as aggregate total TopicSentiment divided by aggregate total TopicExposure.</span></span>
+<span id="cb9-44"><a href=""></a><span class="co"># Each earnings call receives one equal weight, matching the study description</span></span>
+<span id="cb9-45"><a href=""></a><span class="co"># that topic-specific sentiment is averaged across earnings calls.</span></span>
+<span id="cb9-46"><a href=""></a><span class="co">#</span></span>
+<span id="cb9-47"><a href=""></a><span class="co"># Data used:</span></span>
+<span id="cb9-48"><a href=""></a><span class="co">#   AI (2023):     ml_ai.csv</span></span>
+<span id="cb9-49"><a href=""></a><span class="co">#   Brexit (2016): brexit.csv</span></span>
+<span id="cb9-50"><a href=""></a><span class="co">#   Covid (2020):  covid.csv</span></span>
+<span id="cb9-51"><a href=""></a><span class="co">#   Russia (2022): russia.csv</span></span>
+<span id="cb9-52"><a href=""></a><span class="co">#</span></span>
+<span id="cb9-53"><a href=""></a><span class="co"># Note: russia.csv is used here, not russian_war.csv, because the original</span></span>
+<span id="cb9-54"><a href=""></a><span class="co"># Figure 2 event label is Russia (2022) and the panel is based on the Russia</span></span>
+<span id="cb9-55"><a href=""></a><span class="co"># topic file. russian_war.csv is a narrower war-topic file and makes the Russia</span></span>
+<span id="cb9-56"><a href=""></a><span class="co"># bar too negative for this panel.</span></span>
+<span id="cb9-57"><a href=""></a></span>
+<span id="cb9-58"><a href=""></a>make_panel_a_row <span class="ot">&lt;-</span> <span class="cf">function</span>(data, event_name, event_year) {</span>
+<span id="cb9-59"><a href=""></a>  temp <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span></span>
+<span id="cb9-60"><a href=""></a>    <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb9-61"><a href=""></a>    dplyr<span class="sc">::</span><span class="fu">filter</span>(</span>
+<span id="cb9-62"><a href=""></a>      year <span class="sc">==</span> event_year,</span>
+<span id="cb9-63"><a href=""></a>      <span class="sc">!</span><span class="fu">is.na</span>(topic_sentiment),</span>
+<span id="cb9-64"><a href=""></a>      <span class="sc">!</span><span class="fu">is.na</span>(topic_exposure),</span>
+<span id="cb9-65"><a href=""></a>      topic_exposure <span class="sc">&gt;</span> <span class="dv">0</span>,</span>
+<span id="cb9-66"><a href=""></a>      <span class="fu">is.finite</span>(topic_sentiment),</span>
+<span id="cb9-67"><a href=""></a>      <span class="fu">is.finite</span>(topic_exposure)</span>
+<span id="cb9-68"><a href=""></a>    )</span>
+<span id="cb9-69"><a href=""></a>  </span>
+<span id="cb9-70"><a href=""></a>  <span class="cf">if</span> (<span class="fu">nrow</span>(temp) <span class="sc">==</span> <span class="dv">0</span>) {</span>
+<span id="cb9-71"><a href=""></a>    <span class="fu">stop</span>(<span class="st">"No usable data found for "</span>, event_name, <span class="st">". Check the file and year filter."</span>)</span>
+<span id="cb9-72"><a href=""></a>  }</span>
+<span id="cb9-73"><a href=""></a>  </span>
+<span id="cb9-74"><a href=""></a>  <span class="co"># Make sure the aggregation unit is the earnings call. Most topic files are</span></span>
+<span id="cb9-75"><a href=""></a>  <span class="co"># already one row per earnings call, but this guard prevents accidental double</span></span>
+<span id="cb9-76"><a href=""></a>  <span class="co"># counting if duplicate rows appear after importing or joining.</span></span>
+<span id="cb9-77"><a href=""></a>  <span class="cf">if</span> (<span class="st">"earningscall_id"</span> <span class="sc">%in%</span> <span class="fu">names</span>(temp)) {</span>
+<span id="cb9-78"><a href=""></a>    temp_call <span class="ot">&lt;-</span> temp <span class="sc">%&gt;%</span></span>
+<span id="cb9-79"><a href=""></a>      dplyr<span class="sc">::</span><span class="fu">group_by</span>(earningscall_id) <span class="sc">%&gt;%</span></span>
+<span id="cb9-80"><a href=""></a>      dplyr<span class="sc">::</span><span class="fu">summarise</span>(</span>
+<span id="cb9-81"><a href=""></a>        <span class="at">topic_sentiment_call =</span> <span class="fu">mean</span>(topic_sentiment, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb9-82"><a href=""></a>        <span class="at">topic_exposure_call =</span> <span class="fu">mean</span>(topic_exposure, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb9-83"><a href=""></a>        <span class="at">.groups =</span> <span class="st">"drop"</span></span>
+<span id="cb9-84"><a href=""></a>      )</span>
+<span id="cb9-85"><a href=""></a>  } <span class="cf">else</span> {</span>
+<span id="cb9-86"><a href=""></a>    temp_call <span class="ot">&lt;-</span> temp <span class="sc">%&gt;%</span></span>
+<span id="cb9-87"><a href=""></a>      dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb9-88"><a href=""></a>        <span class="at">earningscall_id =</span> dplyr<span class="sc">::</span><span class="fu">row_number</span>(),</span>
+<span id="cb9-89"><a href=""></a>        <span class="at">topic_sentiment_call =</span> topic_sentiment,</span>
+<span id="cb9-90"><a href=""></a>        <span class="at">topic_exposure_call =</span> topic_exposure</span>
+<span id="cb9-91"><a href=""></a>      ) <span class="sc">%&gt;%</span></span>
+<span id="cb9-92"><a href=""></a>      dplyr<span class="sc">::</span><span class="fu">select</span>(earningscall_id, topic_sentiment_call, topic_exposure_call)</span>
+<span id="cb9-93"><a href=""></a>  }</span>
+<span id="cb9-94"><a href=""></a>  </span>
+<span id="cb9-95"><a href=""></a>  temp_call <span class="ot">&lt;-</span> temp_call <span class="sc">%&gt;%</span></span>
+<span id="cb9-96"><a href=""></a>    dplyr<span class="sc">::</span><span class="fu">filter</span>(</span>
+<span id="cb9-97"><a href=""></a>      <span class="sc">!</span><span class="fu">is.na</span>(topic_sentiment_call),</span>
+<span id="cb9-98"><a href=""></a>      <span class="sc">!</span><span class="fu">is.na</span>(topic_exposure_call),</span>
+<span id="cb9-99"><a href=""></a>      <span class="fu">is.finite</span>(topic_sentiment_call),</span>
+<span id="cb9-100"><a href=""></a>      <span class="fu">is.finite</span>(topic_exposure_call),</span>
+<span id="cb9-101"><a href=""></a>      topic_exposure_call <span class="sc">&gt;</span> <span class="dv">0</span></span>
+<span id="cb9-102"><a href=""></a>    ) <span class="sc">%&gt;%</span></span>
+<span id="cb9-103"><a href=""></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb9-104"><a href=""></a>      <span class="at">sentiment_over_exposure_call =</span> topic_sentiment_call <span class="sc">/</span> topic_exposure_call</span>
+<span id="cb9-105"><a href=""></a>    ) <span class="sc">%&gt;%</span></span>
+<span id="cb9-106"><a href=""></a>    dplyr<span class="sc">::</span><span class="fu">filter</span>(</span>
+<span id="cb9-107"><a href=""></a>      <span class="sc">!</span><span class="fu">is.na</span>(sentiment_over_exposure_call),</span>
+<span id="cb9-108"><a href=""></a>      <span class="fu">is.finite</span>(sentiment_over_exposure_call)</span>
+<span id="cb9-109"><a href=""></a>    )</span>
+<span id="cb9-110"><a href=""></a>  </span>
+<span id="cb9-111"><a href=""></a>  <span class="cf">if</span> (<span class="fu">nrow</span>(temp_call) <span class="sc">==</span> <span class="dv">0</span>) {</span>
+<span id="cb9-112"><a href=""></a>    <span class="fu">stop</span>(<span class="st">"No usable call-level observations found for "</span>, event_name, <span class="st">"."</span>)</span>
+<span id="cb9-113"><a href=""></a>  }</span>
+<span id="cb9-114"><a href=""></a>  </span>
+<span id="cb9-115"><a href=""></a>  tibble<span class="sc">::</span><span class="fu">tibble</span>(</span>
+<span id="cb9-116"><a href=""></a>    <span class="at">event =</span> event_name,</span>
+<span id="cb9-117"><a href=""></a>    <span class="at">event_year =</span> event_year,</span>
+<span id="cb9-118"><a href=""></a>    <span class="at">data_file =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
+<span id="cb9-119"><a href=""></a>      event_name <span class="sc">==</span> <span class="st">"AI (2023)"</span> <span class="sc">~</span> <span class="st">"ml_ai.csv"</span>,</span>
+<span id="cb9-120"><a href=""></a>      event_name <span class="sc">==</span> <span class="st">"Brexit (2016)"</span> <span class="sc">~</span> <span class="st">"brexit.csv"</span>,</span>
+<span id="cb9-121"><a href=""></a>      event_name <span class="sc">==</span> <span class="st">"Covid (2020)"</span> <span class="sc">~</span> <span class="st">"covid.csv"</span>,</span>
+<span id="cb9-122"><a href=""></a>      event_name <span class="sc">==</span> <span class="st">"Russia (2022)"</span> <span class="sc">~</span> <span class="st">"russia.csv"</span>,</span>
+<span id="cb9-123"><a href=""></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_character_</span></span>
+<span id="cb9-124"><a href=""></a>    ),</span>
+<span id="cb9-125"><a href=""></a>    <span class="at">n_calls =</span> dplyr<span class="sc">::</span><span class="fu">n_distinct</span>(temp_call<span class="sc">$</span>earningscall_id),</span>
+<span id="cb9-126"><a href=""></a>    <span class="at">mean_topic_sentiment =</span> <span class="fu">mean</span>(temp_call<span class="sc">$</span>topic_sentiment_call, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb9-127"><a href=""></a>    <span class="at">mean_topic_exposure =</span> <span class="fu">mean</span>(temp_call<span class="sc">$</span>topic_exposure_call, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb9-128"><a href=""></a>    <span class="at">sentiment_over_exposure =</span> <span class="fu">mean</span>(temp_call<span class="sc">$</span>sentiment_over_exposure_call, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb9-129"><a href=""></a>  )</span>
+<span id="cb9-130"><a href=""></a>}</span>
+<span id="cb9-131"><a href=""></a></span>
+<span id="cb9-132"><a href=""></a><span class="co"># Panel A should appear in descending order, matching the original figure.</span></span>
+<span id="cb9-133"><a href=""></a><span class="co"># The order is computed from the recalculated call-level averages rather than</span></span>
+<span id="cb9-134"><a href=""></a><span class="co"># hard-coded.</span></span>
+<span id="cb9-135"><a href=""></a>fig2a <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">bind_rows</span>(</span>
+<span id="cb9-136"><a href=""></a>  <span class="fu">make_panel_a_row</span>(ai_clean,     <span class="st">"AI (2023)"</span>,     <span class="dv">2023</span>),</span>
+<span id="cb9-137"><a href=""></a>  <span class="fu">make_panel_a_row</span>(brexit_clean, <span class="st">"Brexit (2016)"</span>, <span class="dv">2016</span>),</span>
+<span id="cb9-138"><a href=""></a>  <span class="fu">make_panel_a_row</span>(covid_clean,  <span class="st">"Covid (2020)"</span>,  <span class="dv">2020</span>),</span>
+<span id="cb9-139"><a href=""></a>  <span class="fu">make_panel_a_row</span>(russia_clean, <span class="st">"Russia (2022)"</span>, <span class="dv">2022</span>)</span>
+<span id="cb9-140"><a href=""></a>) <span class="sc">%&gt;%</span></span>
+<span id="cb9-141"><a href=""></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(sentiment_over_exposure)) <span class="sc">%&gt;%</span></span>
+<span id="cb9-142"><a href=""></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb9-143"><a href=""></a>    <span class="co"># ggplot draws discrete y-axis levels from bottom to top, so reverse the</span></span>
+<span id="cb9-144"><a href=""></a>    <span class="co"># descending order vector to display the largest value at the top.</span></span>
+<span id="cb9-145"><a href=""></a>    <span class="at">event =</span> <span class="fu">factor</span>(event, <span class="at">levels =</span> <span class="fu">rev</span>(<span class="fu">as.character</span>(event)))</span>
+<span id="cb9-146"><a href=""></a>  )</span>
+<span id="cb9-147"><a href=""></a></span>
+<span id="cb9-148"><a href=""></a><span class="fu">message</span>(<span class="st">"Figure 2 Panel A values calculated as the unweighted average across earnings calls of TopicSentiment / TopicExposure:"</span>)</span>
+<span id="cb9-149"><a href=""></a><span class="fu">print</span>(fig2a)</span>
+<span id="cb9-150"><a href=""></a>readr<span class="sc">::</span><span class="fu">write_csv</span>(fig2a, <span class="fu">file.path</span>(output_dir, <span class="st">"figure2_panelA_values_from_data.csv"</span>))</span>
+<span id="cb9-151"><a href=""></a></span>
+<span id="cb9-152"><a href=""></a>p2a <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(fig2a, <span class="fu">aes</span>(<span class="at">x =</span> sentiment_over_exposure, <span class="at">y =</span> event, <span class="at">fill =</span> sentiment_over_exposure <span class="sc">&gt;</span> <span class="dv">0</span>)) <span class="sc">+</span></span>
+<span id="cb9-153"><a href=""></a>  <span class="fu">geom_col</span>(<span class="at">width =</span> <span class="fl">0.65</span>, <span class="at">show.legend =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb9-154"><a href=""></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="dv">0</span>, <span class="at">linewidth =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb9-155"><a href=""></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"TRUE"</span> <span class="ot">=</span> pos_col, <span class="st">"FALSE"</span> <span class="ot">=</span> neg_col)) <span class="sc">+</span></span>
+<span id="cb9-156"><a href=""></a>  <span class="fu">scale_x_continuous</span>(</span>
+<span id="cb9-157"><a href=""></a>    <span class="at">limits =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.4</span>, <span class="fl">0.4</span>),</span>
+<span id="cb9-158"><a href=""></a>    <span class="at">breaks =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.4</span>, <span class="sc">-</span><span class="fl">0.2</span>, <span class="dv">0</span>, <span class="fl">0.2</span>, <span class="fl">0.4</span>)</span>
+<span id="cb9-159"><a href=""></a>  ) <span class="sc">+</span></span>
+<span id="cb9-160"><a href=""></a>  <span class="fu">labs</span>(</span>
+<span id="cb9-161"><a href=""></a>    <span class="at">title =</span> <span class="st">"Panel A. Sentiment by event"</span>,</span>
+<span id="cb9-162"><a href=""></a>    <span class="at">x =</span> <span class="st">"Topic sentiment / topic exposure"</span>,</span>
+<span id="cb9-163"><a href=""></a>    <span class="at">y =</span> <span class="cn">NULL</span></span>
+<span id="cb9-164"><a href=""></a>  ) <span class="sc">+</span></span>
+<span id="cb9-165"><a href=""></a>  panel_theme</span>
+<span id="cb9-166"><a href=""></a><span class="co"># ============================================================</span></span>
+<span id="cb9-167"><a href=""></a><span class="co"># 14. CREATE FIGURE 2, PANEL B: AI SENTIMENT BY FIRM</span></span>
+<span id="cb9-168"><a href=""></a><span class="co"># ============================================================</span></span>
+<span id="cb9-169"><a href=""></a></span>
+<span id="cb9-170"><a href=""></a><span class="co"># Keep only selected firms that appear in the original style of Panel B.</span></span>
+<span id="cb9-171"><a href=""></a>fig2b <span class="ot">&lt;-</span> ai_clean <span class="sc">%&gt;%</span></span>
+<span id="cb9-172"><a href=""></a>  <span class="fu">filter</span>(year <span class="sc">==</span> <span class="dv">2023</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb9-173"><a href=""></a>  <span class="fu">mutate</span>(</span>
+<span id="cb9-174"><a href=""></a>    <span class="at">firm_label =</span> <span class="fu">case_when</span>(</span>
+<span id="cb9-175"><a href=""></a>      <span class="fu">str_detect</span>(firm, <span class="fu">regex</span>(<span class="st">"Alphabet"</span>, <span class="at">ignore_case =</span> <span class="cn">TRUE</span>)) <span class="sc">~</span> <span class="st">"Alphabet Inc."</span>,</span>
+<span id="cb9-176"><a href=""></a>      <span class="fu">str_detect</span>(firm, <span class="fu">regex</span>(<span class="st">"NVIDIA"</span>, <span class="at">ignore_case =</span> <span class="cn">TRUE</span>)) <span class="sc">~</span> <span class="st">"NVIDIA Corp."</span>,</span>
+<span id="cb9-177"><a href=""></a>      <span class="fu">str_detect</span>(firm, <span class="fu">regex</span>(<span class="st">"Microsoft"</span>, <span class="at">ignore_case =</span> <span class="cn">TRUE</span>)) <span class="sc">~</span> <span class="st">"Microsoft Corp."</span>,</span>
+<span id="cb9-178"><a href=""></a>      <span class="fu">str_detect</span>(firm, <span class="fu">regex</span>(<span class="st">"Warner Music"</span>, <span class="at">ignore_case =</span> <span class="cn">TRUE</span>)) <span class="sc">~</span> <span class="st">"Warner Music</span><span class="sc">\n</span><span class="st">Group Corp."</span>,</span>
+<span id="cb9-179"><a href=""></a>      <span class="fu">str_detect</span>(firm, <span class="fu">regex</span>(<span class="st">"^News Corp"</span>, <span class="at">ignore_case =</span> <span class="cn">TRUE</span>)) <span class="sc">~</span> <span class="st">"News Corp."</span>,</span>
+<span id="cb9-180"><a href=""></a>      <span class="fu">str_detect</span>(firm, <span class="fu">regex</span>(<span class="st">"Universal Music"</span>, <span class="at">ignore_case =</span> <span class="cn">TRUE</span>)) <span class="sc">~</span> <span class="st">"Universal Music</span><span class="sc">\n</span><span class="st">Group NV"</span>,</span>
+<span id="cb9-181"><a href=""></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_character_</span></span>
+<span id="cb9-182"><a href=""></a>    )</span>
+<span id="cb9-183"><a href=""></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb9-184"><a href=""></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(firm_label)) <span class="sc">%&gt;%</span></span>
+<span id="cb9-185"><a href=""></a>  <span class="fu">group_by</span>(firm_label) <span class="sc">%&gt;%</span></span>
+<span id="cb9-186"><a href=""></a>  <span class="fu">summarise</span>(</span>
+<span id="cb9-187"><a href=""></a>    <span class="co"># Convert sentiment to percentage scale.</span></span>
+<span id="cb9-188"><a href=""></a>    <span class="at">ai_sentiment =</span> <span class="fu">mean</span>(topic_sentiment, <span class="at">na.rm =</span> <span class="cn">TRUE</span>) <span class="sc">*</span> <span class="dv">100</span>,</span>
+<span id="cb9-189"><a href=""></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
+<span id="cb9-190"><a href=""></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb9-191"><a href=""></a>  <span class="fu">mutate</span>(</span>
+<span id="cb9-192"><a href=""></a>    <span class="at">firm_label =</span> <span class="fu">factor</span>(</span>
+<span id="cb9-193"><a href=""></a>      firm_label,</span>
+<span id="cb9-194"><a href=""></a>      <span class="at">levels =</span> <span class="fu">rev</span>(<span class="fu">c</span>(</span>
+<span id="cb9-195"><a href=""></a>        <span class="st">"Alphabet Inc."</span>,</span>
+<span id="cb9-196"><a href=""></a>        <span class="st">"NVIDIA Corp."</span>,</span>
+<span id="cb9-197"><a href=""></a>        <span class="st">"Microsoft Corp."</span>,</span>
+<span id="cb9-198"><a href=""></a>        <span class="st">"Warner Music</span><span class="sc">\n</span><span class="st">Group Corp."</span>,</span>
+<span id="cb9-199"><a href=""></a>        <span class="st">"News Corp."</span>,</span>
+<span id="cb9-200"><a href=""></a>        <span class="st">"Universal Music</span><span class="sc">\n</span><span class="st">Group NV"</span></span>
+<span id="cb9-201"><a href=""></a>      ))</span>
+<span id="cb9-202"><a href=""></a>    )</span>
+<span id="cb9-203"><a href=""></a>  )</span>
+<span id="cb9-204"><a href=""></a></span>
+<span id="cb9-205"><a href=""></a><span class="fu">message</span>(<span class="st">"Figure 2 Panel B values calculated from ml_ai.csv:"</span>)</span>
+<span id="cb9-206"><a href=""></a><span class="fu">print</span>(fig2b)</span>
+<span id="cb9-207"><a href=""></a>readr<span class="sc">::</span><span class="fu">write_csv</span>(fig2b, <span class="fu">file.path</span>(output_dir, <span class="st">"figure2_panelB_values_from_data.csv"</span>))</span>
+<span id="cb9-208"><a href=""></a></span>
+<span id="cb9-209"><a href=""></a><span class="co"># Create horizontal bar chart for AI sentiment by firm.</span></span>
+<span id="cb9-210"><a href=""></a>p2b <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(fig2b, <span class="fu">aes</span>(<span class="at">x =</span> ai_sentiment, <span class="at">y =</span> firm_label, <span class="at">fill =</span> ai_sentiment <span class="sc">&gt;</span> <span class="dv">0</span>)) <span class="sc">+</span></span>
+<span id="cb9-211"><a href=""></a>  <span class="fu">geom_col</span>(<span class="at">width =</span> <span class="fl">0.65</span>, <span class="at">show.legend =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb9-212"><a href=""></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="dv">0</span>, <span class="at">linewidth =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb9-213"><a href=""></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"TRUE"</span> <span class="ot">=</span> pos_col, <span class="st">"FALSE"</span> <span class="ot">=</span> neg_col)) <span class="sc">+</span></span>
+<span id="cb9-214"><a href=""></a>  <span class="fu">scale_x_continuous</span>(</span>
+<span id="cb9-215"><a href=""></a>    <span class="at">limits =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">2</span>, <span class="fl">6.5</span>),</span>
+<span id="cb9-216"><a href=""></a>    <span class="at">breaks =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">2</span>, <span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">6</span>)</span>
+<span id="cb9-217"><a href=""></a>  ) <span class="sc">+</span></span>
+<span id="cb9-218"><a href=""></a>  <span class="fu">labs</span>(</span>
+<span id="cb9-219"><a href=""></a>    <span class="at">title =</span> <span class="st">"Panel B. AI (2023) sentiment by firm"</span>,</span>
+<span id="cb9-220"><a href=""></a>    <span class="at">x =</span> <span class="st">"AI net sentiment in 2023"</span>,</span>
+<span id="cb9-221"><a href=""></a>    <span class="at">y =</span> <span class="cn">NULL</span></span>
+<span id="cb9-222"><a href=""></a>  ) <span class="sc">+</span></span>
+<span id="cb9-223"><a href=""></a>  panel_theme</span>
+<span id="cb9-224"><a href=""></a><span class="co"># ============================================================</span></span>
+<span id="cb9-225"><a href=""></a><span class="co"># 15. CREATE FIGURE 2, PANEL C: RUSSIA SENTIMENT BY COUNTRY</span></span>
+<span id="cb9-226"><a href=""></a><span class="co"># ============================================================</span></span>
 <span id="cb9-227"><a href=""></a></span>
-<span id="cb9-228"><a href=""></a><span class="co"># Calculate Russia-related sentiment for selected countries in 2022.</span></span>
-<span id="cb9-229"><a href=""></a>fig2c <span class="ot">&lt;-</span> russia_clean <span class="sc">%&gt;%</span></span>
-<span id="cb9-230"><a href=""></a>  <span class="fu">filter</span>(year <span class="sc">==</span> <span class="dv">2022</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb9-231"><a href=""></a>  <span class="fu">filter</span>(country <span class="sc">%in%</span> country_order) <span class="sc">%&gt;%</span></span>
-<span id="cb9-232"><a href=""></a>  <span class="fu">group_by</span>(country) <span class="sc">%&gt;%</span></span>
-<span id="cb9-233"><a href=""></a>  <span class="fu">summarise</span>(</span>
-<span id="cb9-234"><a href=""></a>    <span class="co"># Convert sentiment to percentage scale.</span></span>
-<span id="cb9-235"><a href=""></a>    <span class="at">russia_sentiment =</span> <span class="fu">mean</span>(topic_sentiment, <span class="at">na.rm =</span> <span class="cn">TRUE</span>) <span class="sc">*</span> <span class="dv">100</span>,</span>
-<span id="cb9-236"><a href=""></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
-<span id="cb9-237"><a href=""></a>  ) <span class="sc">%&gt;%</span></span>
-<span id="cb9-238"><a href=""></a>  <span class="fu">mutate</span>(</span>
-<span id="cb9-239"><a href=""></a>    <span class="at">country =</span> <span class="fu">factor</span>(country, <span class="at">levels =</span> <span class="fu">rev</span>(country_order))</span>
-<span id="cb9-240"><a href=""></a>  )</span>
+<span id="cb9-228"><a href=""></a><span class="co"># Define the countries shown in Panel C.</span></span>
+<span id="cb9-229"><a href=""></a>country_order <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb9-230"><a href=""></a>  <span class="st">"India"</span>,</span>
+<span id="cb9-231"><a href=""></a>  <span class="st">"United States"</span>,</span>
+<span id="cb9-232"><a href=""></a>  <span class="st">"Norway"</span>,</span>
+<span id="cb9-233"><a href=""></a>  <span class="st">"China"</span>,</span>
+<span id="cb9-234"><a href=""></a>  <span class="st">"United Kingdom"</span>,</span>
+<span id="cb9-235"><a href=""></a>  <span class="st">"Japan"</span>,</span>
+<span id="cb9-236"><a href=""></a>  <span class="st">"South Korea"</span>,</span>
+<span id="cb9-237"><a href=""></a>  <span class="st">"Denmark"</span>,</span>
+<span id="cb9-238"><a href=""></a>  <span class="st">"Germany"</span>,</span>
+<span id="cb9-239"><a href=""></a>  <span class="st">"Finland"</span></span>
+<span id="cb9-240"><a href=""></a>)</span>
 <span id="cb9-241"><a href=""></a></span>
-<span id="cb9-242"><a href=""></a><span class="co"># Create horizontal bar chart for Russia sentiment by country.</span></span>
-<span id="cb9-243"><a href=""></a>p2c <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(fig2c, <span class="fu">aes</span>(<span class="at">x =</span> russia_sentiment, <span class="at">y =</span> country, <span class="at">fill =</span> russia_sentiment <span class="sc">&gt;</span> <span class="dv">0</span>)) <span class="sc">+</span></span>
-<span id="cb9-244"><a href=""></a>  <span class="fu">geom_col</span>(<span class="at">width =</span> <span class="fl">0.65</span>, <span class="at">show.legend =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
-<span id="cb9-245"><a href=""></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="dv">0</span>, <span class="at">linewidth =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
-<span id="cb9-246"><a href=""></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"TRUE"</span> <span class="ot">=</span> pos_col, <span class="st">"FALSE"</span> <span class="ot">=</span> neg_col)) <span class="sc">+</span></span>
-<span id="cb9-247"><a href=""></a>  <span class="fu">scale_x_continuous</span>(</span>
-<span id="cb9-248"><a href=""></a>    <span class="at">limits =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.25</span>, <span class="fl">0.01</span>),</span>
-<span id="cb9-249"><a href=""></a>    <span class="at">breaks =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.25</span>, <span class="sc">-</span><span class="fl">0.20</span>, <span class="sc">-</span><span class="fl">0.15</span>, <span class="sc">-</span><span class="fl">0.10</span>, <span class="sc">-</span><span class="fl">0.05</span>, <span class="dv">0</span>)</span>
-<span id="cb9-250"><a href=""></a>  ) <span class="sc">+</span></span>
-<span id="cb9-251"><a href=""></a>  <span class="fu">labs</span>(</span>
-<span id="cb9-252"><a href=""></a>    <span class="at">title =</span> <span class="st">"Panel C. Russia (2022) sentiment by country"</span>,</span>
-<span id="cb9-253"><a href=""></a>    <span class="at">x =</span> <span class="st">"Russia (2022) sentiment</span><span class="sc">\n</span><span class="st">by country"</span>,</span>
-<span id="cb9-254"><a href=""></a>    <span class="at">y =</span> <span class="cn">NULL</span></span>
-<span id="cb9-255"><a href=""></a>  ) <span class="sc">+</span></span>
-<span id="cb9-256"><a href=""></a>  panel_theme</span>
-<span id="cb9-257"><a href=""></a><span class="co"># ============================================================</span></span>
-<span id="cb9-258"><a href=""></a><span class="co"># 16. CREATE FIGURE 2, PANEL D: COVID SENTIMENT BY INDUSTRY</span></span>
-<span id="cb9-259"><a href=""></a><span class="co"># ============================================================</span></span>
-<span id="cb9-260"><a href=""></a></span>
-<span id="cb9-261"><a href=""></a><span class="co"># The available nl_analytics file does not contain the exact SIC industry labels</span></span>
-<span id="cb9-262"><a href=""></a><span class="co"># required to reproduce Panel D directly from the raw data.</span></span>
-<span id="cb9-263"><a href=""></a><span class="co"># Therefore, this block uses the same industry categories and approximate values</span></span>
-<span id="cb9-264"><a href=""></a><span class="co"># in the same scale/sign direction for a visual replication.</span></span>
-<span id="cb9-265"><a href=""></a>fig2d <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
-<span id="cb9-266"><a href=""></a>  <span class="at">industry =</span> <span class="fu">c</span>(</span>
-<span id="cb9-267"><a href=""></a>    <span class="st">"Video tape rental"</span>,</span>
-<span id="cb9-268"><a href=""></a>    <span class="st">"Offices and clinics of</span><span class="sc">\n</span><span class="st">doctors of medicine"</span>,</span>
-<span id="cb9-269"><a href=""></a>    <span class="st">"Photographic equipment</span><span class="sc">\n</span><span class="st">and supplies"</span>,</span>
-<span id="cb9-270"><a href=""></a>    <span class="st">"Medical and dental</span><span class="sc">\n</span><span class="st">laboratories"</span>,</span>
-<span id="cb9-271"><a href=""></a>    <span class="st">"Nonstore retailers"</span>,</span>
-<span id="cb9-272"><a href=""></a>    <span class="st">"Eating and drinking places"</span>,</span>
-<span id="cb9-273"><a href=""></a>    <span class="st">"Personnel supply services"</span>,</span>
-<span id="cb9-274"><a href=""></a>    <span class="st">"Life insurance"</span>,</span>
-<span id="cb9-275"><a href=""></a>    <span class="st">"Motion picture theaters"</span></span>
-<span id="cb9-276"><a href=""></a>  ),</span>
-<span id="cb9-277"><a href=""></a>  <span class="at">covid_sentiment =</span> <span class="fu">c</span>(</span>
-<span id="cb9-278"><a href=""></a>    <span class="fl">0.35</span>,</span>
-<span id="cb9-279"><a href=""></a>    <span class="fl">0.22</span>,</span>
-<span id="cb9-280"><a href=""></a>    <span class="fl">0.08</span>,</span>
-<span id="cb9-281"><a href=""></a>    <span class="fl">0.04</span>,</span>
-<span id="cb9-282"><a href=""></a>    <span class="sc">-</span><span class="fl">0.03</span>,</span>
-<span id="cb9-283"><a href=""></a>    <span class="sc">-</span><span class="fl">0.12</span>,</span>
-<span id="cb9-284"><a href=""></a>    <span class="sc">-</span><span class="fl">0.70</span>,</span>
-<span id="cb9-285"><a href=""></a>    <span class="sc">-</span><span class="fl">1.05</span>,</span>
-<span id="cb9-286"><a href=""></a>    <span class="sc">-</span><span class="fl">1.20</span></span>
-<span id="cb9-287"><a href=""></a>  )</span>
-<span id="cb9-288"><a href=""></a>) <span class="sc">%&gt;%</span></span>
-<span id="cb9-289"><a href=""></a>  <span class="fu">mutate</span>(</span>
-<span id="cb9-290"><a href=""></a>    <span class="at">industry =</span> <span class="fu">factor</span>(</span>
-<span id="cb9-291"><a href=""></a>      industry,</span>
-<span id="cb9-292"><a href=""></a>      <span class="at">levels =</span> <span class="fu">rev</span>(<span class="fu">c</span>(</span>
-<span id="cb9-293"><a href=""></a>        <span class="st">"Video tape rental"</span>,</span>
-<span id="cb9-294"><a href=""></a>        <span class="st">"Offices and clinics of</span><span class="sc">\n</span><span class="st">doctors of medicine"</span>,</span>
-<span id="cb9-295"><a href=""></a>        <span class="st">"Photographic equipment</span><span class="sc">\n</span><span class="st">and supplies"</span>,</span>
-<span id="cb9-296"><a href=""></a>        <span class="st">"Medical and dental</span><span class="sc">\n</span><span class="st">laboratories"</span>,</span>
-<span id="cb9-297"><a href=""></a>        <span class="st">"Nonstore retailers"</span>,</span>
-<span id="cb9-298"><a href=""></a>        <span class="st">"Eating and drinking places"</span>,</span>
-<span id="cb9-299"><a href=""></a>        <span class="st">"Personnel supply services"</span>,</span>
-<span id="cb9-300"><a href=""></a>        <span class="st">"Life insurance"</span>,</span>
-<span id="cb9-301"><a href=""></a>        <span class="st">"Motion picture theaters"</span></span>
-<span id="cb9-302"><a href=""></a>      ))</span>
-<span id="cb9-303"><a href=""></a>    )</span>
-<span id="cb9-304"><a href=""></a>  )</span>
-<span id="cb9-305"><a href=""></a></span>
-<span id="cb9-306"><a href=""></a><span class="co"># Create horizontal bar chart for Covid sentiment by industry.</span></span>
-<span id="cb9-307"><a href=""></a>p2d <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(fig2d, <span class="fu">aes</span>(<span class="at">x =</span> covid_sentiment, <span class="at">y =</span> industry, <span class="at">fill =</span> covid_sentiment <span class="sc">&gt;</span> <span class="dv">0</span>)) <span class="sc">+</span></span>
-<span id="cb9-308"><a href=""></a>  <span class="fu">geom_col</span>(<span class="at">width =</span> <span class="fl">0.65</span>, <span class="at">show.legend =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
-<span id="cb9-309"><a href=""></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="dv">0</span>, <span class="at">linewidth =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
-<span id="cb9-310"><a href=""></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"TRUE"</span> <span class="ot">=</span> pos_col, <span class="st">"FALSE"</span> <span class="ot">=</span> neg_col)) <span class="sc">+</span></span>
-<span id="cb9-311"><a href=""></a>  <span class="fu">scale_x_continuous</span>(</span>
-<span id="cb9-312"><a href=""></a>    <span class="at">limits =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">1.5</span>, <span class="fl">0.5</span>),</span>
-<span id="cb9-313"><a href=""></a>    <span class="at">breaks =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">1.5</span>, <span class="sc">-</span><span class="fl">1.0</span>, <span class="sc">-</span><span class="fl">0.5</span>, <span class="dv">0</span>, <span class="fl">0.5</span>)</span>
-<span id="cb9-314"><a href=""></a>  ) <span class="sc">+</span></span>
-<span id="cb9-315"><a href=""></a>  <span class="fu">labs</span>(</span>
-<span id="cb9-316"><a href=""></a>    <span class="at">title =</span> <span class="st">"Panel D. Covid (2020) sentiment by industry"</span>,</span>
-<span id="cb9-317"><a href=""></a>    <span class="at">x =</span> <span class="st">"Covid (2020) sentiment</span><span class="sc">\n</span><span class="st">by industry"</span>,</span>
-<span id="cb9-318"><a href=""></a>    <span class="at">y =</span> <span class="cn">NULL</span></span>
-<span id="cb9-319"><a href=""></a>  ) <span class="sc">+</span></span>
-<span id="cb9-320"><a href=""></a>  panel_theme <span class="sc">+</span></span>
-<span id="cb9-321"><a href=""></a>  <span class="fu">theme</span>(<span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">9</span>))</span>
-<span id="cb9-322"><a href=""></a></span>
-<span id="cb9-323"><a href=""></a><span class="co"># ===========================================================================</span></span>
-<span id="cb9-324"><a href=""></a><span class="co"># 17. COMBINE AND SAVE FIGURE 2</span></span>
-<span id="cb9-325"><a href=""></a><span class="co"># ===========================================================================</span></span>
-<span id="cb9-326"><a href=""></a></span>
-<span id="cb9-327"><a href=""></a><span class="co"># Arrange the four panels in a two-by-two layout.</span></span>
-<span id="cb9-328"><a href=""></a>figure2 <span class="ot">&lt;-</span> ((p2a <span class="sc">|</span> p2b) <span class="sc">/</span> (p2c <span class="sc">|</span> p2d)) <span class="sc">+</span></span>
-<span id="cb9-329"><a href=""></a>  patchwork<span class="sc">::</span><span class="fu">plot_layout</span>(</span>
-<span id="cb9-330"><a href=""></a>    <span class="at">widths =</span> <span class="fu">c</span>(<span class="fl">1.05</span>, <span class="fl">1.75</span>),</span>
-<span id="cb9-331"><a href=""></a>    <span class="at">heights =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="fl">1.35</span>)</span>
-<span id="cb9-332"><a href=""></a>  ) <span class="sc">+</span></span>
-<span id="cb9-333"><a href=""></a>  patchwork<span class="sc">::</span><span class="fu">plot_annotation</span>(</span>
-<span id="cb9-334"><a href=""></a>    <span class="at">title =</span> <span class="st">"Figure 2. Text-Based Sentiment"</span>,</span>
-<span id="cb9-335"><a href=""></a>    <span class="at">theme =</span> <span class="fu">theme</span>(</span>
-<span id="cb9-336"><a href=""></a>      <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">17</span>, <span class="at">hjust =</span> <span class="dv">0</span>, <span class="at">margin =</span> <span class="fu">margin</span>(<span class="at">b =</span> <span class="dv">14</span>))</span>
-<span id="cb9-337"><a href=""></a>    )</span>
-<span id="cb9-338"><a href=""></a>  )</span>
-<span id="cb9-339"><a href=""></a></span>
-<span id="cb9-340"><a href=""></a><span class="co"># Print the figure in the Plots pane.</span></span>
-<span id="cb9-341"><a href=""></a><span class="fu">print</span>(figure2)</span>
-<span id="cb9-342"><a href=""></a></span>
-<span id="cb9-343"><a href=""></a><span class="co"># Save a high-resolution PNG version of Figure 2.</span></span>
-<span id="cb9-344"><a href=""></a><span class="fu">ggsave</span>(</span>
-<span id="cb9-345"><a href=""></a>  <span class="at">filename =</span> <span class="fu">file.path</span>(output_dir, <span class="st">"figure2_replication_final_readable.png"</span>),</span>
-<span id="cb9-346"><a href=""></a>  <span class="at">plot =</span> figure2,</span>
-<span id="cb9-347"><a href=""></a>  <span class="at">width =</span> <span class="dv">16</span>,</span>
-<span id="cb9-348"><a href=""></a>  <span class="at">height =</span> <span class="dv">10</span>,</span>
-<span id="cb9-349"><a href=""></a>  <span class="at">dpi =</span> <span class="dv">300</span>,</span>
-<span id="cb9-350"><a href=""></a>  <span class="at">bg =</span> <span class="st">"white"</span></span>
-<span id="cb9-351"><a href=""></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb9-242"><a href=""></a><span class="co"># Calculate Russia-related sentiment for selected countries in 2022.</span></span>
+<span id="cb9-243"><a href=""></a>fig2c <span class="ot">&lt;-</span> russia_clean <span class="sc">%&gt;%</span></span>
+<span id="cb9-244"><a href=""></a>  <span class="fu">filter</span>(year <span class="sc">==</span> <span class="dv">2022</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb9-245"><a href=""></a>  <span class="fu">filter</span>(country <span class="sc">%in%</span> country_order) <span class="sc">%&gt;%</span></span>
+<span id="cb9-246"><a href=""></a>  <span class="fu">group_by</span>(country) <span class="sc">%&gt;%</span></span>
+<span id="cb9-247"><a href=""></a>  <span class="fu">summarise</span>(</span>
+<span id="cb9-248"><a href=""></a>    <span class="co"># Convert sentiment to percentage scale.</span></span>
+<span id="cb9-249"><a href=""></a>    <span class="at">russia_sentiment =</span> <span class="fu">mean</span>(topic_sentiment, <span class="at">na.rm =</span> <span class="cn">TRUE</span>) <span class="sc">*</span> <span class="dv">100</span>,</span>
+<span id="cb9-250"><a href=""></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
+<span id="cb9-251"><a href=""></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb9-252"><a href=""></a>  <span class="fu">mutate</span>(</span>
+<span id="cb9-253"><a href=""></a>    <span class="at">country =</span> <span class="fu">factor</span>(country, <span class="at">levels =</span> <span class="fu">rev</span>(country_order))</span>
+<span id="cb9-254"><a href=""></a>  )</span>
+<span id="cb9-255"><a href=""></a></span>
+<span id="cb9-256"><a href=""></a><span class="fu">message</span>(<span class="st">"Figure 2 Panel C values calculated from russia.csv:"</span>)</span>
+<span id="cb9-257"><a href=""></a><span class="fu">print</span>(fig2c)</span>
+<span id="cb9-258"><a href=""></a>readr<span class="sc">::</span><span class="fu">write_csv</span>(fig2c, <span class="fu">file.path</span>(output_dir, <span class="st">"figure2_panelC_values_from_data.csv"</span>))</span>
+<span id="cb9-259"><a href=""></a></span>
+<span id="cb9-260"><a href=""></a><span class="co"># Create horizontal bar chart for Russia sentiment by country.</span></span>
+<span id="cb9-261"><a href=""></a>p2c <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(fig2c, <span class="fu">aes</span>(<span class="at">x =</span> russia_sentiment, <span class="at">y =</span> country, <span class="at">fill =</span> russia_sentiment <span class="sc">&gt;</span> <span class="dv">0</span>)) <span class="sc">+</span></span>
+<span id="cb9-262"><a href=""></a>  <span class="fu">geom_col</span>(<span class="at">width =</span> <span class="fl">0.65</span>, <span class="at">show.legend =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb9-263"><a href=""></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="dv">0</span>, <span class="at">linewidth =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb9-264"><a href=""></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"TRUE"</span> <span class="ot">=</span> pos_col, <span class="st">"FALSE"</span> <span class="ot">=</span> neg_col)) <span class="sc">+</span></span>
+<span id="cb9-265"><a href=""></a>  <span class="fu">scale_x_continuous</span>(</span>
+<span id="cb9-266"><a href=""></a>    <span class="at">limits =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.25</span>, <span class="fl">0.01</span>),</span>
+<span id="cb9-267"><a href=""></a>    <span class="at">breaks =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.25</span>, <span class="sc">-</span><span class="fl">0.20</span>, <span class="sc">-</span><span class="fl">0.15</span>, <span class="sc">-</span><span class="fl">0.10</span>, <span class="sc">-</span><span class="fl">0.05</span>, <span class="dv">0</span>)</span>
+<span id="cb9-268"><a href=""></a>  ) <span class="sc">+</span></span>
+<span id="cb9-269"><a href=""></a>  <span class="fu">labs</span>(</span>
+<span id="cb9-270"><a href=""></a>    <span class="at">title =</span> <span class="st">"Panel C. Russia (2022) sentiment by country"</span>,</span>
+<span id="cb9-271"><a href=""></a>    <span class="at">x =</span> <span class="st">"Russia (2022) sentiment</span><span class="sc">\n</span><span class="st">by country"</span>,</span>
+<span id="cb9-272"><a href=""></a>    <span class="at">y =</span> <span class="cn">NULL</span></span>
+<span id="cb9-273"><a href=""></a>  ) <span class="sc">+</span></span>
+<span id="cb9-274"><a href=""></a>  panel_theme</span>
+<span id="cb9-275"><a href=""></a><span class="co"># ============================================================</span></span>
+<span id="cb9-276"><a href=""></a><span class="co"># 16. CREATE FIGURE 2, PANEL D: COVID SENTIMENT BY INDUSTRY</span></span>
+<span id="cb9-277"><a href=""></a><span class="co"># ============================================================</span></span>
+<span id="cb9-278"><a href=""></a></span>
+<span id="cb9-279"><a href=""></a><span class="co"># IMPORTANT FIX FOR PANEL D</span></span>
+<span id="cb9-280"><a href=""></a><span class="co"># The original Figure 2 Panel D is calculated by 3-digit SIC sector for</span></span>
+<span id="cb9-281"><a href=""></a><span class="co"># U.S.-headquartered firms.</span></span>
+<span id="cb9-282"><a href=""></a><span class="co">#</span></span>
+<span id="cb9-283"><a href=""></a><span class="co"># Data used:</span></span>
+<span id="cb9-284"><a href=""></a><span class="co">#   - covid.csv: Covid topic sentiment, firm name, country, year</span></span>
+<span id="cb9-285"><a href=""></a><span class="co">#   - ml_ai_gvkeys.csv: Compustat SIC code matched by earningscall_id</span></span>
+<span id="cb9-286"><a href=""></a><span class="co">#</span></span>
+<span id="cb9-287"><a href=""></a><span class="co"># Calculation:</span></span>
+<span id="cb9-288"><a href=""></a><span class="co">#   1. Join covid.csv to ml_ai_gvkeys.csv by earningscall_id.</span></span>
+<span id="cb9-289"><a href=""></a><span class="co">#   2. Keep year == 2020 and country == "United States".</span></span>
+<span id="cb9-290"><a href=""></a><span class="co">#   3. Convert sic_compustat to 3-digit SIC using floor(sic_compustat / 10).</span></span>
+<span id="cb9-291"><a href=""></a><span class="co">#   4. Keep the original Figure 2 SIC3 industry groups.</span></span>
+<span id="cb9-292"><a href=""></a><span class="co">#   5. Calculate mean(topic_sentiment) * 100 by SIC3 industry.</span></span>
+<span id="cb9-293"><a href=""></a><span class="co">#</span></span>
+<span id="cb9-294"><a href=""></a><span class="co"># Only the mapping from 3-digit SIC code to display label is written manually.</span></span>
+<span id="cb9-295"><a href=""></a><span class="co"># The bar values are calculated from the uploaded data.</span></span>
+<span id="cb9-296"><a href=""></a></span>
+<span id="cb9-297"><a href=""></a><span class="co"># Use paneld_industry rather than industry to avoid a name conflict with the</span></span>
+<span id="cb9-298"><a href=""></a><span class="co"># existing covid_clean$industry column.</span></span>
+<span id="cb9-299"><a href=""></a>sic3_paneld_map <span class="ot">&lt;-</span> tibble<span class="sc">::</span><span class="fu">tibble</span>(</span>
+<span id="cb9-300"><a href=""></a>  <span class="at">paneld_industry =</span> <span class="fu">c</span>(</span>
+<span id="cb9-301"><a href=""></a>    <span class="st">"Video tape rental"</span>,</span>
+<span id="cb9-302"><a href=""></a>    <span class="st">"Offices and clinics of</span><span class="sc">\n</span><span class="st">doctors of medicine"</span>,</span>
+<span id="cb9-303"><a href=""></a>    <span class="st">"Photographic equipment</span><span class="sc">\n</span><span class="st">and supplies"</span>,</span>
+<span id="cb9-304"><a href=""></a>    <span class="st">"Medical and dental</span><span class="sc">\n</span><span class="st">laboratories"</span>,</span>
+<span id="cb9-305"><a href=""></a>    <span class="st">"Nonstore retailers"</span>,</span>
+<span id="cb9-306"><a href=""></a>    <span class="st">"Eating and drinking places"</span>,</span>
+<span id="cb9-307"><a href=""></a>    <span class="st">"Personnel supply services"</span>,</span>
+<span id="cb9-308"><a href=""></a>    <span class="st">"Life insurance"</span>,</span>
+<span id="cb9-309"><a href=""></a>    <span class="st">"Motion picture theaters"</span></span>
+<span id="cb9-310"><a href=""></a>  ),</span>
+<span id="cb9-311"><a href=""></a>  <span class="at">sic3 =</span> <span class="fu">c</span>(</span>
+<span id="cb9-312"><a href=""></a>    <span class="dv">784</span>,  <span class="co"># Video tape rental</span></span>
+<span id="cb9-313"><a href=""></a>    <span class="dv">801</span>,  <span class="co"># Offices and clinics of doctors of medicine</span></span>
+<span id="cb9-314"><a href=""></a>    <span class="dv">386</span>,  <span class="co"># Photographic equipment and supplies</span></span>
+<span id="cb9-315"><a href=""></a>    <span class="dv">807</span>,  <span class="co"># Medical and dental laboratories</span></span>
+<span id="cb9-316"><a href=""></a>    <span class="dv">596</span>,  <span class="co"># Nonstore retailers</span></span>
+<span id="cb9-317"><a href=""></a>    <span class="dv">581</span>,  <span class="co"># Eating and drinking places</span></span>
+<span id="cb9-318"><a href=""></a>    <span class="dv">736</span>,  <span class="co"># Personnel supply services</span></span>
+<span id="cb9-319"><a href=""></a>    <span class="dv">631</span>,  <span class="co"># Life insurance</span></span>
+<span id="cb9-320"><a href=""></a>    <span class="dv">783</span>   <span class="co"># Motion picture theaters</span></span>
+<span id="cb9-321"><a href=""></a>  )</span>
+<span id="cb9-322"><a href=""></a>)</span>
+<span id="cb9-323"><a href=""></a></span>
+<span id="cb9-324"><a href=""></a>covid_with_sic3 <span class="ot">&lt;-</span> covid_clean <span class="sc">%&gt;%</span></span>
+<span id="cb9-325"><a href=""></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(gvkeys_sic, <span class="at">by =</span> <span class="st">"earningscall_id"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb9-326"><a href=""></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb9-327"><a href=""></a>    <span class="at">sic3 =</span> <span class="fu">as.integer</span>(<span class="fu">floor</span>(sic_compustat <span class="sc">/</span> <span class="dv">10</span>))</span>
+<span id="cb9-328"><a href=""></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb9-329"><a href=""></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(</span>
+<span id="cb9-330"><a href=""></a>    year <span class="sc">==</span> <span class="dv">2020</span>,</span>
+<span id="cb9-331"><a href=""></a>    country <span class="sc">==</span> <span class="st">"United States"</span>,</span>
+<span id="cb9-332"><a href=""></a>    <span class="sc">!</span><span class="fu">is.na</span>(sic3),</span>
+<span id="cb9-333"><a href=""></a>    <span class="sc">!</span><span class="fu">is.na</span>(topic_sentiment)</span>
+<span id="cb9-334"><a href=""></a>  )</span>
+<span id="cb9-335"><a href=""></a></span>
+<span id="cb9-336"><a href=""></a>fig2d <span class="ot">&lt;-</span> covid_with_sic3 <span class="sc">%&gt;%</span></span>
+<span id="cb9-337"><a href=""></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(sic3_paneld_map, <span class="at">by =</span> <span class="st">"sic3"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb9-338"><a href=""></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(paneld_industry, sic3) <span class="sc">%&gt;%</span></span>
+<span id="cb9-339"><a href=""></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(</span>
+<span id="cb9-340"><a href=""></a>    <span class="at">n_calls =</span> dplyr<span class="sc">::</span><span class="fu">n_distinct</span>(earningscall_id),</span>
+<span id="cb9-341"><a href=""></a>    <span class="at">n_firms =</span> dplyr<span class="sc">::</span><span class="fu">n_distinct</span>(firm),</span>
+<span id="cb9-342"><a href=""></a>    <span class="at">covid_sentiment =</span> <span class="fu">mean</span>(topic_sentiment, <span class="at">na.rm =</span> <span class="cn">TRUE</span>) <span class="sc">*</span> <span class="dv">100</span>,</span>
+<span id="cb9-343"><a href=""></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
+<span id="cb9-344"><a href=""></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb9-345"><a href=""></a>  dplyr<span class="sc">::</span><span class="fu">right_join</span>(sic3_paneld_map, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"paneld_industry"</span>, <span class="st">"sic3"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb9-346"><a href=""></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(<span class="fu">match</span>(paneld_industry, sic3_paneld_map<span class="sc">$</span>paneld_industry)) <span class="sc">%&gt;%</span></span>
+<span id="cb9-347"><a href=""></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb9-348"><a href=""></a>    <span class="at">industry =</span> <span class="fu">factor</span>(paneld_industry, <span class="at">levels =</span> <span class="fu">rev</span>(sic3_paneld_map<span class="sc">$</span>paneld_industry))</span>
+<span id="cb9-349"><a href=""></a>  )</span>
+<span id="cb9-350"><a href=""></a></span>
+<span id="cb9-351"><a href=""></a><span class="fu">message</span>(<span class="st">"Figure 2 Panel D values are calculated from covid.csv + ml_ai_gvkeys.csv."</span>)</span>
+<span id="cb9-352"><a href=""></a><span class="fu">message</span>(<span class="st">"Panel D filter: year == 2020 and country == United States."</span>)</span>
+<span id="cb9-353"><a href=""></a><span class="fu">message</span>(<span class="st">"Panel D industry level: 3-digit SIC sector."</span>)</span>
+<span id="cb9-354"><a href=""></a><span class="fu">print</span>(fig2d)</span>
+<span id="cb9-355"><a href=""></a>readr<span class="sc">::</span><span class="fu">write_csv</span>(fig2d, <span class="fu">file.path</span>(output_dir, <span class="st">"figure2_panelD_values_US_SIC3_from_data.csv"</span>))</span>
+<span id="cb9-356"><a href=""></a></span>
+<span id="cb9-357"><a href=""></a><span class="co"># Create horizontal bar chart for Covid sentiment by SIC3 industry.</span></span>
+<span id="cb9-358"><a href=""></a>p2d <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(fig2d, <span class="fu">aes</span>(<span class="at">x =</span> covid_sentiment, <span class="at">y =</span> industry, <span class="at">fill =</span> covid_sentiment <span class="sc">&gt;</span> <span class="dv">0</span>)) <span class="sc">+</span></span>
+<span id="cb9-359"><a href=""></a>  <span class="fu">geom_col</span>(<span class="at">width =</span> <span class="fl">0.65</span>, <span class="at">show.legend =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb9-360"><a href=""></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="dv">0</span>, <span class="at">linewidth =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb9-361"><a href=""></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"TRUE"</span> <span class="ot">=</span> pos_col, <span class="st">"FALSE"</span> <span class="ot">=</span> neg_col)) <span class="sc">+</span></span>
+<span id="cb9-362"><a href=""></a>  <span class="fu">scale_x_continuous</span>(</span>
+<span id="cb9-363"><a href=""></a>    <span class="at">limits =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">1.5</span>, <span class="fl">0.5</span>),</span>
+<span id="cb9-364"><a href=""></a>    <span class="at">breaks =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">1.5</span>, <span class="sc">-</span><span class="fl">1.0</span>, <span class="sc">-</span><span class="fl">0.5</span>, <span class="dv">0</span>, <span class="fl">0.5</span>)</span>
+<span id="cb9-365"><a href=""></a>  ) <span class="sc">+</span></span>
+<span id="cb9-366"><a href=""></a>  <span class="fu">labs</span>(</span>
+<span id="cb9-367"><a href=""></a>    <span class="at">title =</span> <span class="st">"Panel D. Covid (2020) sentiment by industry"</span>,</span>
+<span id="cb9-368"><a href=""></a>    <span class="at">x =</span> <span class="st">"Covid (2020) sentiment</span><span class="sc">\n</span><span class="st">by industry"</span>,</span>
+<span id="cb9-369"><a href=""></a>    <span class="at">y =</span> <span class="cn">NULL</span></span>
+<span id="cb9-370"><a href=""></a>  ) <span class="sc">+</span></span>
+<span id="cb9-371"><a href=""></a>  panel_theme <span class="sc">+</span></span>
+<span id="cb9-372"><a href=""></a>  <span class="fu">theme</span>(<span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">9</span>))</span>
+<span id="cb9-373"><a href=""></a></span>
+<span id="cb9-374"><a href=""></a><span class="co"># ===========================================================================</span></span>
+<span id="cb9-375"><a href=""></a><span class="co"># 17. COMBINE AND SAVE FIGURE 2</span></span>
+<span id="cb9-376"><a href=""></a><span class="co"># ===========================================================================</span></span>
+<span id="cb9-377"><a href=""></a></span>
+<span id="cb9-378"><a href=""></a><span class="co"># Arrange the four panels in a two-by-two layout.</span></span>
+<span id="cb9-379"><a href=""></a>figure2 <span class="ot">&lt;-</span> ((p2a <span class="sc">|</span> p2b) <span class="sc">/</span> (p2c <span class="sc">|</span> p2d)) <span class="sc">+</span></span>
+<span id="cb9-380"><a href=""></a>  patchwork<span class="sc">::</span><span class="fu">plot_layout</span>(</span>
+<span id="cb9-381"><a href=""></a>    <span class="at">widths =</span> <span class="fu">c</span>(<span class="fl">1.05</span>, <span class="fl">1.75</span>),</span>
+<span id="cb9-382"><a href=""></a>    <span class="at">heights =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="fl">1.35</span>)</span>
+<span id="cb9-383"><a href=""></a>  ) <span class="sc">+</span></span>
+<span id="cb9-384"><a href=""></a>  patchwork<span class="sc">::</span><span class="fu">plot_annotation</span>(</span>
+<span id="cb9-385"><a href=""></a>    <span class="at">title =</span> <span class="st">"Figure 2. Text-Based Sentiment"</span>,</span>
+<span id="cb9-386"><a href=""></a>    <span class="at">theme =</span> <span class="fu">theme</span>(</span>
+<span id="cb9-387"><a href=""></a>      <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">17</span>, <span class="at">hjust =</span> <span class="dv">0</span>, <span class="at">margin =</span> <span class="fu">margin</span>(<span class="at">b =</span> <span class="dv">14</span>))</span>
+<span id="cb9-388"><a href=""></a>    )</span>
+<span id="cb9-389"><a href=""></a>  )</span>
+<span id="cb9-390"><a href=""></a></span>
+<span id="cb9-391"><a href=""></a><span class="co"># Print the figure in the Plots pane.</span></span>
+<span id="cb9-392"><a href=""></a><span class="fu">print</span>(figure2)</span>
+<span id="cb9-393"><a href=""></a></span>
+<span id="cb9-394"><a href=""></a><span class="co"># Save a high-resolution PNG version of Figure 2.</span></span>
+<span id="cb9-395"><a href=""></a><span class="fu">ggsave</span>(</span>
+<span id="cb9-396"><a href=""></a>  <span class="at">filename =</span> <span class="fu">file.path</span>(output_dir, <span class="st">"figure2_replication_final_readable.png"</span>),</span>
+<span id="cb9-397"><a href=""></a>  <span class="at">plot =</span> figure2,</span>
+<span id="cb9-398"><a href=""></a>  <span class="at">width =</span> <span class="dv">16</span>,</span>
+<span id="cb9-399"><a href=""></a>  <span class="at">height =</span> <span class="dv">10</span>,</span>
+<span id="cb9-400"><a href=""></a>  <span class="at">dpi =</span> <span class="dv">300</span>,</span>
+<span id="cb9-401"><a href=""></a>  <span class="at">bg =</span> <span class="st">"white"</span></span>
+<span id="cb9-402"><a href=""></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section class="slide level2">
 
 <h4 class="smaller" id="replicated-figure-2">Replicated Figure 2</h4>
 
-<img data-src="images/figure2_replication_final_readable.png" class="r-stretch quarto-figure quarto-figure-center"><p>Figure 2 shows text-based sentiment from earnings calls, comparing positive and negative firm discussions across events, companies, countries, and industries.</p>
+<img data-src="images/figure2_replication_final_readable-01.png" class="r-stretch quarto-figure quarto-figure-center"><p>Figure 2 shows text-based sentiment from earnings calls, comparing positive and negative firm discussions across events, companies, countries, and industries.</p>
 </section>
 <section id="hurdles-during-data-manipulation" class="slide level2">
 <h2>Hurdles during data manipulation</h2>

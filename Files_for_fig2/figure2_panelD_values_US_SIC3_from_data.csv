@@ -1,0 +1,16 @@
+paneld_industry,sic3,n_calls,n_firms,covid_sentiment,industry
+Video tape rental,784,4,1,0.40630101192832524,Video tape rental
+"Offices and clinics of
+doctors of medicine",801,8,2,0.21306573950381377,"Offices and clinics of
+doctors of medicine"
+"Photographic equipment
+and supplies",386,15,4,0.09130121360223599,"Photographic equipment
+and supplies"
+"Medical and dental
+laboratories",807,51,13,0.11190303526600275,"Medical and dental
+laboratories"
+Nonstore retailers,596,99,28,-0.030877817418595653,Nonstore retailers
+Eating and drinking places,581,154,41,-0.1275061755418753,Eating and drinking places
+Personnel supply services,736,84,21,-0.7236894844136175,Personnel supply services
+Life insurance,631,49,12,-1.037571312339729,Life insurance
+Motion picture theaters,783,17,5,-1.1449573288829986,Motion picture theaters

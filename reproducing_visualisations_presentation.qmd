@@ -237,7 +237,7 @@ setwd(project_dir)
 nl_dir <- file.path(project_dir, "nl_analytics")
 
 # Define the folder where final figures will be saved.
-output_dir <- file.path(project_dir, "output")
+output_dir <- file.path(project_dir, "Presentation_Fig")
 
 # Create the output folder if it does not already exist.
 dir.create(output_dir, showWarnings = FALSE, recursive = TRUE)
@@ -264,20 +264,42 @@ Finally, I created a list of required packages for the project and wrote a small
 # 3. DEFINE HELPER FUNCTIONS
 # ============================================================
 
-# This function reads one topic CSV file from the nl_analytics folder.
-# It also cleans column names so they are easier to use in R.
-read_topic_csv <- function(file_name) {
-  file_path <- file.path(nl_dir, file_name)
+# This function reads one CSV file from the data folder.
+# It first looks for the exact file name, then allows uploaded duplicate names
+# such as covid(2).csv by searching for files that begin with the same stem.
+read_topic_csv <- function(file_name, required = TRUE) {
+  exact_paths <- c(
+    file.path(nl_dir, file_name),
+    file.path(project_dir, file_name),
+    file.path(getwd(), file_name)
+  )
   
-  # Stop with a clear message if the file is missing.
-  if (!file.exists(file_path)) {
-    stop("File not found: ", file_path)
+  exact_paths <- exact_paths[file.exists(exact_paths)]
+  
+  if (length(exact_paths) > 0) {
+    file_path <- exact_paths[1]
+  } else {
+    file_stem <- tools::file_path_sans_ext(file_name)
+    loose_paths <- c(
+      Sys.glob(file.path(nl_dir, paste0(file_stem, "*.csv"))),
+      Sys.glob(file.path(project_dir, paste0(file_stem, "*.csv"))),
+      Sys.glob(file.path(getwd(), paste0(file_stem, "*.csv")))
+    )
+    loose_paths <- unique(loose_paths[file.exists(loose_paths)])
+    
+    if (length(loose_paths) == 0) {
+      if (required) {
+        stop("File not found: ", file_name, " in ", nl_dir, " or ", project_dir)
+      } else {
+        warning("Optional file not found: ", file_name)
+        return(NULL)
+      }
+    }
+    file_path <- loose_paths[1]
   }
   
-  # fread() is used because it is fast for large CSV files.
+  message("Reading: ", file_path)
   data <- data.table::fread(file_path)
-  
-  # clean_names() converts names like "Company Name" into "company_name".
   data <- janitor::clean_names(data)
   
   return(data)
@@ -289,6 +311,10 @@ read_topic_csv <- function(file_name) {
 clean_topic_file <- function(df, topic_name) {
   
   df <- janitor::clean_names(df)
+  
+  if ("earningscall_id" %in% names(df)) {
+    df$earningscall_id <- as.character(df$earningscall_id)
+  }
   
   out <- df %>%
     mutate(
@@ -367,16 +393,59 @@ Overall, this section was written to make the data cleaning process reproducible
 # 4. IMPORT ALL CSV FILES NEEDED FOR FIGURE 1 AND FIGURE 2
 # ============================================================
 
+# DATA USED FOR FIGURE 1 AND FIGURE 2
+#
+# Figure 1, Panel A: Overall risk
+#   Data files: ml_ai_unconditional.csv + ml_ai.csv
+#   Extraction: ml_ai_unconditional.csv gives unconditional risk sentence counts
+#               and nr_of_sentences. ml_ai.csv is used only as a date lookup
+#               through earningscall_id because the unconditional file does not
+#               contain date_q.
+#   Calculation: quarterly mean of
+#                100 * unconditional_risk_sentences_count / nr_of_sentences.
+#
+# Figure 1, Panel B: Brexit risk
+#   Data file: brexit.csv
+#   Extraction: date_q and risk from the Brexit topic file.
+#   Calculation: quarterly mean of topic risk, converted to percentage scale.
+#
+# Figure 2, Panel A: Sentiment by event
+#   Data files: ml_ai.csv, russia.csv, covid.csv, brexit.csv
+#   Extraction: event-year earnings calls with topic exposure > 0.
+#   Calculation: original-study style average across earnings calls.
+#                For each affected call, calculate TopicSentiment / TopicExposure,
+#                then take the unweighted average across calls. Panel A is sorted
+#                in descending order by this calculated value so the highest
+#                sentiment appears at the top, matching the original Figure 2 layout.
+#
+# Figure 2, Panel B: AI sentiment by firm
+#   Data file: ml_ai.csv
+#   Extraction: selected firms in 2023.
+#   Calculation: mean(sentiment) * 100 by firm.
+#
+# Figure 2, Panel C: Russia sentiment by country
+#   Data file: russia.csv
+#   Extraction: selected headquarters countries in 2022.
+#   Calculation: mean(sentiment) * 100 by country.
+#
+# Figure 2, Panel D: Covid sentiment by industry
+#   Data files: covid.csv + ml_ai_gvkeys.csv
+#   Extraction: Covid calls in 2020, U.S.-headquartered firms only.
+#               ml_ai_gvkeys.csv supplies sic_compustat through earningscall_id.
+#   Calculation: convert sic_compustat to 3-digit SIC sector and calculate
+#                mean(sentiment) * 100 for the original SIC3 industry groups.
+
 # Import the topic-level data files.
 # These files are used to calculate exposure, risk, and sentiment measures.
 brexit       <- read_topic_csv("brexit.csv")
 covid        <- read_topic_csv("covid.csv")
 inflation    <- read_topic_csv("inflation.csv")
 ml_ai        <- read_topic_csv("ml_ai.csv")
-ml_ai_uncond <- read_topic_csv("ml_ai_unconditional.csv")
+ml_ai_uncond <- read_topic_csv("ml_ai_unconditional.csv", required = FALSE)
+ml_ai_gvkeys <- read_topic_csv("ml_ai_gvkeys.csv")
 russia       <- read_topic_csv("russia.csv")
-russian_war  <- read_topic_csv("russian_war.csv")
-supplychain  <- read_topic_csv("supplychain.csv")
+russian_war  <- read_topic_csv("russian_war.csv", required = FALSE)
+supplychain  <- read_topic_csv("supplychain.csv", required = FALSE)
 trade        <- read_topic_csv("trade.csv")
 
 # Show a short message to confirm successful import.
@@ -388,13 +457,29 @@ message("All required CSV files were imported successfully.")
 # ============================================================
 
 # Apply the same cleaning function to each topic file.
-ai_clean          <- clean_topic_file(ml_ai, "AI")
-brexit_clean      <- clean_topic_file(brexit, "Brexit")
-covid_clean       <- clean_topic_file(covid, "Covid")
-russia_clean      <- clean_topic_file(russia, "Russia")
-inflation_clean   <- clean_topic_file(inflation, "Inflation")
-supplychain_clean <- clean_topic_file(supplychain, "Supply chain")
-trade_clean       <- clean_topic_file(trade, "Trade")
+ai_clean        <- clean_topic_file(ml_ai, "AI")
+brexit_clean    <- clean_topic_file(brexit, "Brexit")
+covid_clean     <- clean_topic_file(covid, "Covid")
+russia_clean    <- clean_topic_file(russia, "Russia")
+inflation_clean <- clean_topic_file(inflation, "Inflation")
+trade_clean     <- clean_topic_file(trade, "Trade")
+
+if (!is.null(russian_war)) {
+  russian_war_clean <- clean_topic_file(russian_war, "Russia War")
+}
+
+if (!is.null(supplychain)) {
+  supplychain_clean <- clean_topic_file(supplychain, "Supply chain")
+}
+
+gvkeys_sic <- ml_ai_gvkeys %>%
+  janitor::clean_names() %>%
+  dplyr::transmute(
+    earningscall_id = as.character(earningscall_id),
+    sic_compustat = as.integer(sic_compustat)
+  ) %>%
+  dplyr::filter(!is.na(earningscall_id), !is.na(sic_compustat)) %>%
+  dplyr::distinct(earningscall_id, .keep_all = TRUE)
 
 # Check that dates were converted correctly.
 message("Missing AI dates: ", sum(is.na(ai_clean$qtr_date)))
@@ -702,7 +787,7 @@ ggsave(
 
 ##### Figure 1, Panel A: Overall Risk
 
-![](images/figure1_panel_a_overall_risk.png){.r-stretch fig-align="center"}
+![](images/figure1_panel_a_overall_risk-01.png){.r-stretch fig-align="center"}
 
 This panel shows the average overall risk discussed in corporate earnings calls over time. The y-axis measures the percentage of sentences that contain risk or uncertainty-related terms. The line increases during major crisis periods, including the global financial crisis, the European debt crisis, and the Covid-19 pandemic. This shows that firms discuss risk more frequently when economic uncertainty rises.
 
@@ -837,7 +922,7 @@ ggsave(
 
 ##### Figure 1, Panel B: Brexit Risk
 
-![](images/figure1_panel_b_brexit_risk.png){.r-stretch fig-align="center"}
+![](images/figure1_panel_b_brexit_risk-01.png){.r-stretch fig-align="center"}
 
 This panel focuses specifically on Brexit-related risk. It measures the percentage of earnings-call sentences that mention both Brexit and risk-related language. The sharp increase after the 2016 Brexit referendum shows that firms became more concerned about the economic and policy uncertainty caused by the United Kingdom’s decision to leave the European Union. Later increases reflect continued uncertainty around the Brexit agreement and the possibility of a no-deal Brexit.
 
@@ -878,34 +963,31 @@ panel_theme <- theme_minimal(base_size = 11) +
 # 13. CREATE FIGURE 2, PANEL A: SENTIMENT BY EVENT
 # ============================================================
 
-# Figure 2, Panel A reports topic sentiment divided by topic exposure.
-# The paper explains that AI is positive, while Russia, Covid, and Brexit are negative.
-# The AI value is about +0.32 because 42.1% of AI-related sentences are positive
-# and 10.2% are negative, giving a net value of about +0.32.
-
-# ------------------------------------------------------------
-# Step 1: Prepare the correct Russia event data.
-# ------------------------------------------------------------
-# Your folder contains both russia.csv and russian_war.csv.
-# For Panel A, the event is Russia's 2022 invasion/war shock, so we use
-# russian_war.csv when it is available. If it is not available, the code falls
-# back to russia_clean so the script still runs.
-if (exists("russian_war")) {
-  russian_war_clean <- clean_topic_file(russian_war, "Russia (2022)")
-  russia_event_data <- russian_war_clean
-} else {
-  russia_event_data <- russia_clean
-}
-
-# ------------------------------------------------------------
-# Step 2: Define a helper function for Panel A.
-# ------------------------------------------------------------
-# This function calculates:
-# topic sentiment / topic exposure
+# IMPORTANT FIX FOR PANEL A
+# This version recalculates Panel A using the original-study aggregation rule:
+# take an unweighted average across earnings calls of the call-level
+# topic-specific sentiment measure.
 #
-# If the number of sentences is available, the calculation is weighted by
-# nr_of_sentences. This is more accurate than taking a simple average because
-# earnings calls with more sentences contribute more text to the aggregate figure.
+# The plotted call-level measure is:
+#   TopicSentiment / TopicExposure
+# for calls in the event year where TopicExposure > 0.
+#
+# This is intentionally NOT sentence-weighted, exposure-weighted, or calculated
+# as aggregate total TopicSentiment divided by aggregate total TopicExposure.
+# Each earnings call receives one equal weight, matching the study description
+# that topic-specific sentiment is averaged across earnings calls.
+#
+# Data used:
+#   AI (2023):     ml_ai.csv
+#   Brexit (2016): brexit.csv
+#   Covid (2020):  covid.csv
+#   Russia (2022): russia.csv
+#
+# Note: russia.csv is used here, not russian_war.csv, because the original
+# Figure 2 event label is Russia (2022) and the panel is based on the Russia
+# topic file. russian_war.csv is a narrower war-topic file and makes the Russia
+# bar too negative for this panel.
+
 make_panel_a_row <- function(data, event_name, event_year) {
   temp <- data %>%
     as.data.frame() %>%
@@ -913,80 +995,93 @@ make_panel_a_row <- function(data, event_name, event_year) {
       year == event_year,
       !is.na(topic_sentiment),
       !is.na(topic_exposure),
-      topic_exposure != 0
+      topic_exposure > 0,
+      is.finite(topic_sentiment),
+      is.finite(topic_exposure)
     )
   
-  # Stop early with a clear message if the event-year data are missing.
   if (nrow(temp) == 0) {
-    stop("No usable data found for ", event_name, ". Check the data file and year filter.")
+    stop("No usable data found for ", event_name, ". Check the file and year filter.")
   }
   
-  # Use sentence-weighted aggregation when nr_of_sentences is available.
-  if ("nr_of_sentences" %in% names(temp)) {
-    temp <- temp %>%
-      dplyr::mutate(nr_of_sentences = as.numeric(nr_of_sentences)) %>%
-      dplyr::filter(!is.na(nr_of_sentences), nr_of_sentences > 0)
-    
-    sentiment_value <- sum(temp$topic_sentiment * temp$nr_of_sentences, na.rm = TRUE) /
-      sum(temp$topic_exposure * temp$nr_of_sentences, na.rm = TRUE)
+  # Make sure the aggregation unit is the earnings call. Most topic files are
+  # already one row per earnings call, but this guard prevents accidental double
+  # counting if duplicate rows appear after importing or joining.
+  if ("earningscall_id" %in% names(temp)) {
+    temp_call <- temp %>%
+      dplyr::group_by(earningscall_id) %>%
+      dplyr::summarise(
+        topic_sentiment_call = mean(topic_sentiment, na.rm = TRUE),
+        topic_exposure_call = mean(topic_exposure, na.rm = TRUE),
+        .groups = "drop"
+      )
   } else {
-    sentiment_value <- sum(temp$topic_sentiment, na.rm = TRUE) /
-      sum(temp$topic_exposure, na.rm = TRUE)
+    temp_call <- temp %>%
+      dplyr::mutate(
+        earningscall_id = dplyr::row_number(),
+        topic_sentiment_call = topic_sentiment,
+        topic_exposure_call = topic_exposure
+      ) %>%
+      dplyr::select(earningscall_id, topic_sentiment_call, topic_exposure_call)
+  }
+  
+  temp_call <- temp_call %>%
+    dplyr::filter(
+      !is.na(topic_sentiment_call),
+      !is.na(topic_exposure_call),
+      is.finite(topic_sentiment_call),
+      is.finite(topic_exposure_call),
+      topic_exposure_call > 0
+    ) %>%
+    dplyr::mutate(
+      sentiment_over_exposure_call = topic_sentiment_call / topic_exposure_call
+    ) %>%
+    dplyr::filter(
+      !is.na(sentiment_over_exposure_call),
+      is.finite(sentiment_over_exposure_call)
+    )
+  
+  if (nrow(temp_call) == 0) {
+    stop("No usable call-level observations found for ", event_name, ".")
   }
   
   tibble::tibble(
     event = event_name,
-    sentiment_over_exposure = sentiment_value
+    event_year = event_year,
+    data_file = dplyr::case_when(
+      event_name == "AI (2023)" ~ "ml_ai.csv",
+      event_name == "Brexit (2016)" ~ "brexit.csv",
+      event_name == "Covid (2020)" ~ "covid.csv",
+      event_name == "Russia (2022)" ~ "russia.csv",
+      TRUE ~ NA_character_
+    ),
+    n_calls = dplyr::n_distinct(temp_call$earningscall_id),
+    mean_topic_sentiment = mean(temp_call$topic_sentiment_call, na.rm = TRUE),
+    mean_topic_exposure = mean(temp_call$topic_exposure_call, na.rm = TRUE),
+    sentiment_over_exposure = mean(temp_call$sentiment_over_exposure_call, na.rm = TRUE)
   )
 }
 
-# ------------------------------------------------------------
-# Step 3: Calculate Panel A from the available data.
-# ------------------------------------------------------------
-fig2a_data_based <- dplyr::bind_rows(
-  make_panel_a_row(ai_clean,           "AI (2023)",     2023),
-  make_panel_a_row(russia_event_data,  "Russia (2022)", 2022),
-  make_panel_a_row(covid_clean,        "Covid (2020)",  2020),
-  make_panel_a_row(brexit_clean,       "Brexit (2016)", 2016)
-)
-
-# ------------------------------------------------------------
-# Step 4: Use paper-calibrated values for visual replication.
-# ------------------------------------------------------------
-# Set this to FALSE if you want to show only the values calculated from your
-# local CSV files. Keep it TRUE when your goal is to visually replicate the
-# published Figure 2, Panel A.
-use_paper_panel_a_values <- TRUE
-
-if (use_paper_panel_a_values) {
-  fig2a <- tibble::tibble(
-    event = c("AI (2023)", "Russia (2022)", "Covid (2020)", "Brexit (2016)"),
-    sentiment_over_exposure = c(
-      0.32,   # AI: positive net sentiment from the paper text.
-      -0.10,   # Russia: small negative bar in the original Panel A.
-      -0.13,   # Covid: negative bar, slightly larger than Russia.
-      -0.30    # Brexit: largest negative bar in the original Panel A.
-    )
-  )
-} else {
-  fig2a <- fig2a_data_based
-}
-
-# Order the bars so they match the original figure from top to bottom.
-fig2a <- fig2a %>%
+# Panel A should appear in descending order, matching the original figure.
+# The order is computed from the recalculated call-level averages rather than
+# hard-coded.
+fig2a <- dplyr::bind_rows(
+  make_panel_a_row(ai_clean,     "AI (2023)",     2023),
+  make_panel_a_row(brexit_clean, "Brexit (2016)", 2016),
+  make_panel_a_row(covid_clean,  "Covid (2020)",  2020),
+  make_panel_a_row(russia_clean, "Russia (2022)", 2022)
+) %>%
+  dplyr::arrange(dplyr::desc(sentiment_over_exposure)) %>%
   dplyr::mutate(
-    event = factor(
-      event,
-      levels = rev(c("AI (2023)", "Russia (2022)", "Covid (2020)", "Brexit (2016)"))
-    )
+    # ggplot draws discrete y-axis levels from bottom to top, so reverse the
+    # descending order vector to display the largest value at the top.
+    event = factor(event, levels = rev(as.character(event)))
   )
 
-# Print the calculated values in the Console so you can check them.
+message("Figure 2 Panel A values calculated as the unweighted average across earnings calls of TopicSentiment / TopicExposure:")
 print(fig2a)
+readr::write_csv(fig2a, file.path(output_dir, "figure2_panelA_values_from_data.csv"))
 
-# ------------------------------------------------------------
-# Step 5: Create horizontal bar chart for event sentiment.
-# ------------------------------------------------------------
 p2a <- ggplot(fig2a, aes(x = sentiment_over_exposure, y = event, fill = sentiment_over_exposure > 0)) +
   geom_col(width = 0.65, show.legend = FALSE) +
   geom_vline(xintercept = 0, linewidth = 0.5) +
@@ -1040,6 +1135,10 @@ fig2b <- ai_clean %>%
     )
   )
 
+message("Figure 2 Panel B values calculated from ml_ai.csv:")
+print(fig2b)
+readr::write_csv(fig2b, file.path(output_dir, "figure2_panelB_values_from_data.csv"))
+
 # Create horizontal bar chart for AI sentiment by firm.
 p2b <- ggplot(fig2b, aes(x = ai_sentiment, y = firm_label, fill = ai_sentiment > 0)) +
   geom_col(width = 0.65, show.legend = FALSE) +
@@ -1087,6 +1186,10 @@ fig2c <- russia_clean %>%
     country = factor(country, levels = rev(country_order))
   )
 
+message("Figure 2 Panel C values calculated from russia.csv:")
+print(fig2c)
+readr::write_csv(fig2c, file.path(output_dir, "figure2_panelC_values_from_data.csv"))
+
 # Create horizontal bar chart for Russia sentiment by country.
 p2c <- ggplot(fig2c, aes(x = russia_sentiment, y = country, fill = russia_sentiment > 0)) +
   geom_col(width = 0.65, show.legend = FALSE) +
@@ -1106,12 +1209,28 @@ p2c <- ggplot(fig2c, aes(x = russia_sentiment, y = country, fill = russia_sentim
 # 16. CREATE FIGURE 2, PANEL D: COVID SENTIMENT BY INDUSTRY
 # ============================================================
 
-# The available nl_analytics file does not contain the exact SIC industry labels
-# required to reproduce Panel D directly from the raw data.
-# Therefore, this block uses the same industry categories and approximate values
-# in the same scale/sign direction for a visual replication.
-fig2d <- tibble(
-  industry = c(
+# IMPORTANT FIX FOR PANEL D
+# The original Figure 2 Panel D is calculated by 3-digit SIC sector for
+# U.S.-headquartered firms.
+#
+# Data used:
+#   - covid.csv: Covid topic sentiment, firm name, country, year
+#   - ml_ai_gvkeys.csv: Compustat SIC code matched by earningscall_id
+#
+# Calculation:
+#   1. Join covid.csv to ml_ai_gvkeys.csv by earningscall_id.
+#   2. Keep year == 2020 and country == "United States".
+#   3. Convert sic_compustat to 3-digit SIC using floor(sic_compustat / 10).
+#   4. Keep the original Figure 2 SIC3 industry groups.
+#   5. Calculate mean(topic_sentiment) * 100 by SIC3 industry.
+#
+# Only the mapping from 3-digit SIC code to display label is written manually.
+# The bar values are calculated from the uploaded data.
+
+# Use paneld_industry rather than industry to avoid a name conflict with the
+# existing covid_clean$industry column.
+sic3_paneld_map <- tibble::tibble(
+  paneld_industry = c(
     "Video tape rental",
     "Offices and clinics of\ndoctors of medicine",
     "Photographic equipment\nand supplies",
@@ -1122,36 +1241,53 @@ fig2d <- tibble(
     "Life insurance",
     "Motion picture theaters"
   ),
-  covid_sentiment = c(
-    0.35,
-    0.22,
-    0.08,
-    0.04,
-    -0.03,
-    -0.12,
-    -0.70,
-    -1.05,
-    -1.20
+  sic3 = c(
+    784,  # Video tape rental
+    801,  # Offices and clinics of doctors of medicine
+    386,  # Photographic equipment and supplies
+    807,  # Medical and dental laboratories
+    596,  # Nonstore retailers
+    581,  # Eating and drinking places
+    736,  # Personnel supply services
+    631,  # Life insurance
+    783   # Motion picture theaters
   )
-) %>%
-  mutate(
-    industry = factor(
-      industry,
-      levels = rev(c(
-        "Video tape rental",
-        "Offices and clinics of\ndoctors of medicine",
-        "Photographic equipment\nand supplies",
-        "Medical and dental\nlaboratories",
-        "Nonstore retailers",
-        "Eating and drinking places",
-        "Personnel supply services",
-        "Life insurance",
-        "Motion picture theaters"
-      ))
-    )
+)
+
+covid_with_sic3 <- covid_clean %>%
+  dplyr::left_join(gvkeys_sic, by = "earningscall_id") %>%
+  dplyr::mutate(
+    sic3 = as.integer(floor(sic_compustat / 10))
+  ) %>%
+  dplyr::filter(
+    year == 2020,
+    country == "United States",
+    !is.na(sic3),
+    !is.na(topic_sentiment)
   )
 
-# Create horizontal bar chart for Covid sentiment by industry.
+fig2d <- covid_with_sic3 %>%
+  dplyr::inner_join(sic3_paneld_map, by = "sic3") %>%
+  dplyr::group_by(paneld_industry, sic3) %>%
+  dplyr::summarise(
+    n_calls = dplyr::n_distinct(earningscall_id),
+    n_firms = dplyr::n_distinct(firm),
+    covid_sentiment = mean(topic_sentiment, na.rm = TRUE) * 100,
+    .groups = "drop"
+  ) %>%
+  dplyr::right_join(sic3_paneld_map, by = c("paneld_industry", "sic3")) %>%
+  dplyr::arrange(match(paneld_industry, sic3_paneld_map$paneld_industry)) %>%
+  dplyr::mutate(
+    industry = factor(paneld_industry, levels = rev(sic3_paneld_map$paneld_industry))
+  )
+
+message("Figure 2 Panel D values are calculated from covid.csv + ml_ai_gvkeys.csv.")
+message("Panel D filter: year == 2020 and country == United States.")
+message("Panel D industry level: 3-digit SIC sector.")
+print(fig2d)
+readr::write_csv(fig2d, file.path(output_dir, "figure2_panelD_values_US_SIC3_from_data.csv"))
+
+# Create horizontal bar chart for Covid sentiment by SIC3 industry.
 p2d <- ggplot(fig2d, aes(x = covid_sentiment, y = industry, fill = covid_sentiment > 0)) +
   geom_col(width = 0.65, show.legend = FALSE) +
   geom_vline(xintercept = 0, linewidth = 0.5) +
@@ -1199,13 +1335,14 @@ ggsave(
 )
 
 
+
 ```
 
 ------------------------------------------------------------------------
 
 #### Replicated Figure 2 {.smaller}
 
-![](images/figure2_replication_final_readable.png){.r-stretch fig-align="center"}
+![](images/figure2_replication_final_readable-01.png){.r-stretch fig-align="center"}
 
 Figure 2 shows text-based sentiment from earnings calls, comparing positive and negative firm discussions across events, companies, countries, and industries.
 
